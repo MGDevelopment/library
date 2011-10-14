@@ -7,7 +7,7 @@ Extra distutil commands based on original implementation at:
 from distutils.core import Command
 from unittest import TextTestRunner, TestLoader
 from glob import glob
-from os.path import splitext, basename, join as pjoin, walk
+from os.path import splitext, basename, join as pjoin
 import os
 
 class TestCommand(Command):
