@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from distutils.core import setup
 
 config = {
     'description': 'ILHSA Ecommerce Module',
