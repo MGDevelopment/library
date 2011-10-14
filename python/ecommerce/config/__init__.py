@@ -6,6 +6,8 @@ from os.path import exists, join
 from sys import exc_info
 from yaml import safe_load
 
+global_name = 'global.yaml'
+local_name  = 'local.yaml'
 
 dirs = [ "./config", "/etc/ecommerce" ] # Directories to find XXX S3
 
