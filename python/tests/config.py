@@ -7,8 +7,5 @@ class TestSequenceFunctions(unittest.TestCase):
         pass
 
     def test_config_load(self):
-        c = Config(paths=('.',))  # Just load configuration
+        c = Config(paths=('./tests/files',))  # Just load configuration
         print c
-
-if __name__ == '__main__':
-    unittest.main()
