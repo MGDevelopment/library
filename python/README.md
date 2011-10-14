@@ -4,10 +4,6 @@ Python Modules for Tematika.com
 This repository contains all the libraries and modules required by the rest of
 the applications running tematika.com
 
-To create packages ready for distribution and installation you should run:
-
-$ python setup.py sdist
-
 Modules
 -------
 
