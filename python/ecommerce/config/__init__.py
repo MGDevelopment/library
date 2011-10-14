@@ -11,9 +11,6 @@ dirs = [ "./config", "/etc/ecommerce" ] # Directories to find XXX S3
 
 __all__ = [ "test" ] # Exported names
 
-if __name__ == "__main__":
-    print "Exports: ", __all__
-
 def find_file(name, paths):
     '''Find an existing file in a list of paths'''
     for dir in paths:
@@ -28,12 +25,7 @@ def merge_files(*args):
         return ''
     ret = ''
     for f in args:
-        print 'Config file: ', f
-        try:
-            fd = open(f, 'r')
-        except:
-            print 'Error opening configuration file "' + f + '"', exc_info()[0]
-            raise # re-raise exception
+        fd = open(f, 'r')
         ret += fd.read() # join strings
     return ret
 
@@ -48,5 +40,7 @@ class Config(object):
         # Find global file
         self.conf = safe_load(merge_files(find_file(fglobal, paths),
                                           find_file(flocal,  paths)))
-        #print "DEBUG\n", self.conf
+
+    def len(self):
+        return len(self.conf)
 
