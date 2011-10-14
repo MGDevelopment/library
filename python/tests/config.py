@@ -1,5 +1,5 @@
-import unittest
 from ecommerce.config import Config
+import unittest
 
 class TestSequenceFunctions(unittest.TestCase):
 
