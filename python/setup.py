@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from distutils.core import setup
+from commands import TestCommand, CleanCommand
 
 config = {
     'description': 'ILHSA Ecommerce Module',
@@ -9,7 +10,11 @@ config = {
                     'ecommerce.content'],
     'requires':    ['pyaml', 'jinja2', 'psycopg'],
     'scripts':     [],
-    'name':        'ecommerce'
+    'name':        'ecommerce',
+    'cmdclass' : {
+        'test': TestCommand,
+        'clean': CleanCommand
+    }
 }
 
 setup(**config)
