@@ -34,3 +34,11 @@ To generate install packages ready for distribution run:
 
 The packages will be ready inside a directory named dist 
 
+To run tests:
+
+        $ python setup.py test
+
+To run clean up:
+
+        $ python setup.py clean
+
