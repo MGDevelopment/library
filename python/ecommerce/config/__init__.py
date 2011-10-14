@@ -37,7 +37,7 @@ class Config(object):
            fglobal: file name for global configuration file
            flocal:  file name for local configuration file
     '''
-    def __init__(self, paths=dirs, fglobal='global.yaml', flocal='local.yaml'):
+    def __init__(self, paths=dirs, fglobal=global_name, flocal=local_name):
         # Open and concatenate files
         # Find global file
         self.conf = safe_load(merge_files(find_file(fglobal, paths),
