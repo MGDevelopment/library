@@ -1,0 +1,9 @@
+instance:
+    type:                   generator_processor
+    environment:            dev_local
+    master:                 1.2.3.4:1234
+    aws:
+        name:               generator
+        access_key_id:      XXXXXXXXXXXXXXXXXXX
+        access_key_secret:  YYYYYYYYYYYYYYYYYYYYYYYYY
+    logfile:                /var/log/generator.log
