@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""Ecommerce module for ILHSA SA
+'''Ecommerce module for ILHSA SA
 by Alejo Sanchez, Jose Luis Campanello and Mariano Goldsman
-"""
+'''
 from os.path import exists, join
 from sys import exc_info
 from yaml import safe_load
@@ -9,9 +9,7 @@ from yaml import safe_load
 global_name = 'global.yaml'
 local_name  = 'local.yaml'
 
-dirs = [ "./config", "/etc/ecommerce" ] # Directories to find XXX S3
-
-__all__ = [ "test" ] # Exported names
+dirs = [ './config', '/etc/ecommerce' ] # Directories to find XXX S3
 
 def find_file(name, paths):
     '''Find an existing file in a list of paths'''
