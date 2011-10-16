@@ -8,7 +8,7 @@ config = {
     'version':     '0.1',
     'packages':    ['ecommerce', 'ecommerce.config', 'ecommerce.db',
                     'ecommerce.content'],
-    'requires':    ['pyaml', 'jinja2', 'psycopg'],
+    'requires':    ['yaml', 'jinja2', 'psycopg'],
     'scripts':     [],
     'name':        'ecommerce',
     'cmdclass' : {
