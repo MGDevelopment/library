@@ -79,12 +79,12 @@ class TestSequenceFunctions(TestCase):
                               "get('top.some-map.entry2') is not a list")
 
     def test_get_top_somemap_entry2E1(self):
-        """Test access to sub-entry"""
+        """Test access to sub-sub-entry list item"""
         self.assertEqual(getConfig().get("top.some-map.entry2[1]"), "test2",
                          "get('top.some-map.entry2[1]') didn't get 'test2'")
 
     def test_get_top_somemap_entry2E1_accessor(self):
-        """Test access to sub-entry"""
+        """Test access with brackets"""
         self.assertEqual(getConfig()["top.some-map.entry2[1]"], "test2",
                          "config['top.some-map.entry2[1]'] didn't get 'test2'")
 

@@ -118,7 +118,7 @@ def getConfig(paths=dirs, fglobal=global_name, flocal=local_name):
 
     The configuration is expected to be a singleton in the sense that
     parsing it multiple times to get the same result is sub-optimal.
-    A SIGHUP signal shall be caugth to re-reread the configuration.
+    A SIGHUP signal shall be caugth to re-read the configuration.
     """
     global _cachedConfig
 
