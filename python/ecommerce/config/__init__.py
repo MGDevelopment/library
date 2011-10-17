@@ -27,7 +27,13 @@ class Config(object):
         self.__syntaxDot = re.compile("^\.?[\w\-\ ]+(\[\d+\])?(\.[\w\-\ ]+(\[\d+\])?)*$")
 
         # create a keychain object for this config
-        self.keychain = Keychain(self)
+        self._keychain = Keychain(self)
+
+
+    @property
+    def keychain(self):
+        """The keychain property"""
+        return self._keychain
 
 
     def len(self):
@@ -45,7 +51,7 @@ class Config(object):
 
     def getMulti(self, key1, key2, default=None):
         """Get from config with a splited key"""
-        return self.get(key1 + key2, default)
+        return self.get(key1 + "." + key2, default)
 
 
     def get(self, key, default=None):

@@ -18,15 +18,18 @@ class ConfigLoader(object):
     def __init__(self, fragments = defaultFragmentList):
         self._fragments = fragments
 
+
     def loadFragment(self, fragment):
         """Loads the named config fragment"""
 
         raise NotImplementedError("loadFragment method not implemented")
 
+
     def hasFragment(self, fragment):
         """Figures out if a config fragment is available"""
 
         raise NotImplementedError("hasFragment method not implemented")
+
 
     def load(self):
         """Loads all the configuration fragments and returns a single string"""
@@ -36,7 +39,7 @@ class ConfigLoader(object):
         for f in self._fragments:
             fragment = self.loadFragment(f)
             if fragment is not None:
-                config += self.loadFragment(f)
+                config += "\n" + self.loadFragment(f)
         return config
 
 
@@ -46,6 +49,7 @@ class ConfigLoaderFileSystem(ConfigLoader):
     def __init__(self, folder, fragments = defaultFragmentList):
         ConfigLoader.__init__(self, fragments)
         self._folder = folder
+
 
     def loadFragment(self, fragment):
         """Load a config fragment from the specified folder (if exists)"""
@@ -143,6 +147,7 @@ class ConfigLoaderStrings(ConfigLoader):
         """Figure out if there is config for the requested fragment"""
 
         return self._configs.has_key(fragment) or self._emptyFragments
+
 
 def getDefaultLoader():
     """Returns a default config file loader.

@@ -4,6 +4,13 @@ This module isolates the application from knowing what DB API 2.0 implementation
 is being used. Also, the application requests connections to a named "database"
 and ignores the details of the connection and the lower level implementation.
 
+Basic module usage is:
+
+    import ecommerce.db
+
+    conn = ecommerce.db.getConnection()        # get default db
+    conn = ecommerce.db.getConnection("name")  # get "name" db
+
 Defined modules:
 
 - dataset --- module to fetch sets of related information from the database
@@ -68,7 +75,6 @@ def getConnection(dbname = None):
         raise DBRuntimeException("Unable to import module [%s] or connect method" % module)
 
     return _modules[module]["connect"](**dbDef["params"])
-
 
 def _init(config = None):
     """Initialize the module
