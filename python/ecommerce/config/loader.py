@@ -6,9 +6,18 @@ Config class. These loaders provide mechanisms for the configuration
 to be read from different places
 """
 
-from os.path import exists, join
+import os
+import os.path
+import platform
 
+#
+# default config folders (as usual, windows is "special")
+#
 defaultFolders = [ './config', '/etc/ecommerce' ]
+if platform.system() == "Windows":
+    defaultFolders = [ '.\\config', 'c:\\etc\\ecommerce' ]
+if "ECOMMERCE_CONFIG_DIR" in os.environ:
+    defaultFolders = os.environ["ECOMMERCE_CONFIG_DIR"].split(":")
 
 defaultFragmentList = [ "global", "local" ]
 
@@ -56,7 +65,7 @@ class ConfigLoaderFileSystem(ConfigLoader):
 
         # check we have the file
         fileName = self._getFileName(fragment)
-        if not exists(fileName):
+        if not os.path.exists(fileName):
             raise IOError('Fragment not found: ' + fragment)
 
         # open, read and close the file
@@ -70,13 +79,13 @@ class ConfigLoaderFileSystem(ConfigLoader):
     def hasFragment(self, fragment):
         """Figure out if the loader has access to the fragment"""
 
-        return exists(self._getFileName(fragment))
+        return os.path.exists(self._getFileName(fragment))
 
 
     def _getFileName(self, fragment):
         """Returns the fragment file name"""
 
-        return join(self._folder, fragment + ".yaml")
+        return os.path.join(self._folder, fragment + ".yaml")
 
 
 class ConfigLoaderMultiplexor(ConfigLoader):
