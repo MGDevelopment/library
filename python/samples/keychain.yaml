@@ -1,0 +1,15 @@
+#
+# keychain file
+#
+master-key:                       # master key (every other key is encrypted with this one)
+                                  # NOT IMPLEMENTED YET!!!
+    value:      44335522661177
+    algorithm:  master-key
+eCommerce-db:                     # key eCommerce-db (no algorithm => is clear text)
+    value:      some-password
+    algorithm:
+some-other-key:                   # key some-other-key (has algorithm and the encryption key)
+                                  # NOT IMPLEMENTED YET!!!
+    value:      44335522661177
+    algorithm:  3DES-cbc
+    key:        master-key

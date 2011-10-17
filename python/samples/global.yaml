@@ -1,0 +1,30 @@
+---
+#
+# database config
+#
+global_db:          &global_db
+    python:         &global_db_python      # base definition of python modules params
+        # params each module requires in connect
+        psycopg2:   [ "database", "host", "port", "user", "password", "sslmode" ] 
+        sqlite3:    [ "database" ] 
+    eCommerce:      &global_db_eCommerce   # base definition of eCommerce db
+        engine:     postgresql             # db engine
+        python:     psycopg2               # python module (will import and use "connect")
+        host:       localhost              # params
+        port:       5432
+        user:       ecommerce
+        password:   keychain:eCommerce-db  # notice the keychain usage
+        database:   ecommerce
+    test:           &global_db_test        # base definition of test db
+        engine:     sqlite                 # db engine
+        python:     sqlite3                # python module (will import and use "connect")
+        database:   /tmp/testdb            # params
+#
+# keychain config
+#
+global_keychain:    &global_keychain       # keychain config
+    file:           keychain.yaml          # keychain file
+    dirs:                                  # keychain dirs to look for keychain file
+        - ./config
+        - /etc/ecommerce
+
