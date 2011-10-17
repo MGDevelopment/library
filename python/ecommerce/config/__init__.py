@@ -2,56 +2,40 @@
 '''Ecommerce module for ILHSA SA
 by Alejo Sanchez, Jose Luis Campanello and Mariano Goldsman
 '''
-from os.path import exists, join
-from sys import exc_info
+
 import re
-from yaml import safe_load
+from yaml       import safe_load
 
-global_name = 'global.yaml'
-local_name  = 'local.yaml'
-
-dirs = [ './config', '/etc/ecommerce' ] # Directories to find XXX S3
-
-def find_file(name, paths):
-    '''Find an existing file in a list of paths'''
-    for dir in paths:
-        fn = join(dir, name)
-        if exists(fn):
-            return fn
-    raise IOError('File not found: ' + name)
-
-def merge_files(*args):
-    '''Open multiple files and return content concatenated'''
-    if len(args) == 0:
-        return ''
-    ret = ''
-    for f in args:
-        fd = open(f, 'r')
-        ret += fd.read() # join strings
-        # FIX - jcampanello - could cause ENFILE if args is long
-        fd.close()
-    return ret
+from loader     import *
+from keychain   import *
 
 class Config(object):
     '''Configuration parser
 
     Parameters:
-    paths:   paths where to look up configuration files
-    fglobal: file name for global configuration file
-    flocal:  file name for local configuration file
+    configLoader: the config loader to use
     '''
-    def __init__(self, paths=dirs, fglobal=global_name, flocal=local_name):
-        # Open and concatenate files
-        # Find global file
-        self.conf = safe_load(merge_files(find_file(fglobal, paths),
-                                          find_file(flocal,  paths)))
+    def __init__(self, configLoader = None):
+        # if no loader, get the default
+        if configLoader is None:
+            configLoader = loader.getDefaultLoader()
+
+        # read and parse the configuration
+        self.conf = safe_load(configLoader.load())
 
         # Prepare the regexp for get syntax
         self.__syntaxDot = re.compile("^\.?[\w\-\ ]+(\[\d+\])?(\.[\w\-\ ]+(\[\d+\])?)*$")
 
+        # create a keychain object for this config
+        self.keychain = Keychain(self)
+
 
     def len(self):
         return len(self.conf)
+
+
+    def fetchKey(self, key):
+        return self.keychain.fetch(key)
 
 
     def __getitem__(self, key):
@@ -113,7 +97,7 @@ class Config(object):
 _cachedConfig = None
 
 
-def getConfig(paths=dirs, fglobal=global_name, flocal=local_name):
+def getConfig(configLoader = None):
     """Return the configuration.
 
     The configuration is expected to be a singleton in the sense that
@@ -124,7 +108,15 @@ def getConfig(paths=dirs, fglobal=global_name, flocal=local_name):
 
     # if needed, read the config
     if _cachedConfig is None:
-        _cachedConfig = Config(paths, fglobal, flocal)
+        _cachedConfig = Config(configLoader)
 
     return _cachedConfig
 
+
+def getConfigFromString(config = ""):
+    """Return a Config object loaded with the passed in config."""
+
+    # create a config object
+    sLoaders = ConfigLoaderStrings( { "global" : config }, True)
+
+    return Config(sLoaders)

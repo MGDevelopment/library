@@ -10,7 +10,7 @@ from os.path import exists, join
 
 defaultFolders = [ './config', '/etc/ecommerce' ]
 
-defaultFragmentList = [ "global", "local", "keychain" ]
+defaultFragmentList = [ "global", "local" ]
 
 class ConfigLoader(object):
     """Base loader class"""
