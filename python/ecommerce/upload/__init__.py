@@ -88,5 +88,3 @@ class S3Uploader(object):
         key.set_contents_from_file(fbuf, policy = 'public-read',
                 reduced_redundancy = True)
 
-        print key.generate_url(10)
-
