@@ -13,26 +13,43 @@ except ImportError:
 content_gzippable = ('text/html', 'text/css', 'application/javascript',
                      'text/plain', 'text/xml')
 
-class FilesystemUploader(object):
+class FilesystemStorage(object):
     '''Filesystem content uploader
     
        params:
            directory:             destination directory (key prefix)
     '''
     def __init__(self, directory):
-        self._directory  = directory
+        if directory[0] is '/':
+            self._directory  = directory
+        else:
+            self._directory  = '/' + directory
 
     def send(self, name, src, type = None):
         '''Store an object on the filesystem
            params
            name:   name for the destination object
            src:    generator of object data
-           type:   Content-Type'''
+           type:   Content-Type (ignored)'''
 
         f = open(os_path_join(self._directory, name), 'w')
         f.write(src)
 
-class S3Uploader(object):
+    def copy(self, dst_name, src_name):
+        '''Copy S3 object to this storage
+           dst_name:   new name (without base directory)
+           src_name:   source object (base directory added for this store)
+           src_bucket: name of source bucket (default this store)
+         '''
+
+        if self._directory:
+            dst_name = '/'.join((self._directory, dst_name))
+            src_name = '/'.join((self._directory, src_name))
+
+        open(dst_name, 'w').write(open(src_name, 'r').read())
+
+
+class S3Storage(object):
     '''S3 content uploader
     
        params:
@@ -87,4 +104,18 @@ class S3Uploader(object):
         # Upload
         key.set_contents_from_file(fbuf, policy = 'public-read',
                 reduced_redundancy = True)
+
+    def copy(self, dst_name, src_name, src_bucket_name = None):
+        '''Copy S3 object to this storage
+           dst_name:   new name (without base directory)
+           src_name:   source object (base directory added for this store)
+           src_bucket: name of source bucket (default this store)
+         '''
+        if not src_bucket_name:
+            src_bucket_name = self._bucket.name
+        if self._directory:
+            dst_name = '/'.join((self._directory, dst_name))
+            if src_bucket_name == self._bucket.name:
+                src_name = '/'.join((self._directory, src_name))
+        self._bucket.copy_key(dst_name, src_bucket_name, src_name)
 
