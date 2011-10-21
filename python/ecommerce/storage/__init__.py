@@ -68,6 +68,11 @@ class S3Storage(object):
         self._bucket     = self._conn.get_bucket(bucket_name)
         self._gzip       = gzip
         self._cache_type = cache_type
+        if directory:
+            if directory[0] is '/':
+                directory = directory[1:] # Remove leading slash for S3
+            if directory[-1] is '/':
+                directory = directory[:-1] # Remove leading slash for S3
         self._directory  = directory
 
     def send(self, name, src, type):
