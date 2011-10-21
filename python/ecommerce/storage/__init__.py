@@ -72,7 +72,7 @@ class S3Storage(object):
             if directory[0] is '/':
                 directory = directory[1:] # Remove leading slash for S3
             if directory[-1] is '/':
-                directory = directory[:-1] # Remove leading slash for S3
+                directory = directory[:-1] # Remove trailing slash for S3
         self._directory  = directory
 
     def send(self, name, src, type):
