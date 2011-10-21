@@ -160,7 +160,7 @@ def initialize(config = None):
     ( _defaultDB, _databases, _modules ) = _init(config)
 
 # initialize
-####initialize()
+initialize()
 
 # public methods
 __all__ = [ "getConnection", "dataset" ]
