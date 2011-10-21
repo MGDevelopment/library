@@ -10,7 +10,7 @@ config = {
                     'ecommerce.config',
                     'ecommerce.db',
                     'ecommerce.content'],
-    'requires':    ['yaml', 'jinja2', 'psycopg'],
+    'requires':    ['yaml', 'jinja2', 'psycopg', 'boto'],
     'scripts':     [],
     'name':        'ecommerce',
     'cmdclass' : {
