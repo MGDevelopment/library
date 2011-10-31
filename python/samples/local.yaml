@@ -11,8 +11,43 @@ db:
         host:       192.168.1.105
     test:                                   # get the test database
         <<:         *global_db_test
+    dataset:                                # configuration of the dataset module
+        <<:         *global_db_dataset
+
 #
 # keychain config
 #
 keychain:                                   # get the keychain
     <<:             *global_keychain
+
+#
+# dataset constants
+#
+constants:
+    content:
+        categories:
+            books:
+                idtype:      118
+                idvalue:     com.ilhsa.category.1
+                subjectid:   1
+            movies:
+                idtype:      118
+                idvalue:     com.ilhsa.category.5
+                subjectid:   676
+            music:
+                idtype:      118
+                idvalue:     com.ilhsa.category.4
+                subjectid:   636
+            games:
+                idtype:      118
+                idvalue:     com.ilhsa.category.3
+                subjectid:   570
+
+#
+# content generation
+#
+content:
+    dataset:                                # configuration of the dataset module
+        database:   eCommerce               # the default database
+        loader:     folder                  # folder loading
+        paths:      [ "./dataset", "./content/dataset" ] # directory where datasets are stored

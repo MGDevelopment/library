@@ -1,0 +1,36 @@
+---
+#
+# query and subqueries example
+#
+# Get publishers (and PublisherIdentifiers and PublisherWebsites) from the Publishers table
+#
+query.sql:              >
+    SELECT   P.PublisherId, P.Name, P,FlagFixed, P.ReplaceWithThisId, P.FlagInvisible
+        FROM Publishers P
+        WHERE   {{PK.PublisherId}}
+        ORDER BY P.PublisherId
+query.prefix:           P
+query.id:               [ "PublisherId" ]
+query.key:              [ "PublisherId" ]
+query.columns:          [ "PublisherId", "Name", "FlagFixed", "ReplaceWithThisId", "FlagInvisible" ]
+query.augment:
+    Identifiers:
+        query.sql:      >
+            SELECT   I.PublisherId, I.IDValue, I.IdentifierTypeId, I.FlagPrimary
+                FROM PublisherIdentifiers I
+                WHERE {{PK.PublisherId}}
+                ORDER BY I.PublisherId, I.IDValue
+        query.prefix:   I
+        query.id:       [ "PublisherId" ]
+        query.key:      [ "PublisherId", "IDValue" ]
+        query.columns:  [ "IDValue", "IdentifierTypeId", "FlagPrimary" ]
+    Websites:
+        query.sql:      >
+            SELECT   W.PublisherId, W.WebsiteRole, W.WebsiteLink, W.WebsiteDescription
+                FROM PublisherIdentifiers W
+                WHERE {{PK.PublisherId}}
+                ORDER BY W.PublisherId, W.WebsiteRole
+        query.prefix:   W
+        query.id:       [ "PublisherId" ]
+        query.key:      [ "PublisherId", "IDValue" ]
+        query.columns:  [ "WebsiteRole", "WebsiteLink", "WebsiteDescription" ]

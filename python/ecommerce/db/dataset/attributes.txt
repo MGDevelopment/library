@@ -1,0 +1,34 @@
+# the order of processing must be: 1) query or code, 2) augment
+
+database        string      Database name. If none, use the default
+single          boolean     True => returns a single row, False => multiple rows. Single
+                            rows are returned as a dictionary. Multiple rows are returned
+                            as a list. ***DEFAULT*** is False
+join.key        str|list    list of keys for joining
+join.embed      boolean     True => subquery fields are imported in parent's dictionary,
+                            False => subquery gets imported as an attribute of parent's dict
+
+list.columns    hash s:s    enumeration of column names that are lists. The "value" is the name
+                            of the list to be passed thru the ecommerce.db.list module. Example:
+                            ONIX.44 (list 44 of ONIX)
+
+query.sql       string      the SELECT
+query.prefix    string      the table prefix name (for use with the PK)
+query.pk        str|list    the PK field names
+query.group     str|list    group the results by the stated fields. An array is created for
+                            each <group fields> n-uple
+query.columns   list        positional list of column names (must match sql)
+query.function  code        code to apply to each row (post conversion to dictionary)
+query.augment   HASH        columns to add to the result. A column name is associated
+                            with an inline dataset (if dict) or an external datase (if string).
+                            A manual join by key is performed
+
+code.name       string      name of a function to invoke. The function can be qualified (ex:
+                            "module.submodule.function"). The module is imported. The single
+                            attribute indicates if a single or multiple row/s is/are returned.
+
+augment         HASH        columns to add to the result. A column name is associated
+                            with an inline dataset (if dict) or an external datase (if string).
+                            REQUIRES that single be True
+
+

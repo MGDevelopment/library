@@ -1,0 +1,46 @@
+---
+query.sql: >
+    SELECT       P.ProductId, P.LanguageCode, P.ReplaceWithThisId, P.FlagInvisible,
+                 P.FlagDeleted, P.CreationDate, P.LastUpdateDate, P.DeletionDate
+        FROM     Products P
+        WHERE   {{ID:ProductId}}
+query.prefix:   P
+query.id:       [ "ProductId" ]
+query.key:      [ "ProductId" ]
+query.columns:  [ "ProductId", "LanguageCode", "ReplaceWithThisId", "FlagInvisible",
+                  "FlagDeleted", "CreationDate", "LastUpdateDate", "DeletionDate" ]
+query.augment:
+    Identifiers:
+        query.sql: >
+            SELECT I.ProductId, I.IDValue, I.IdentifierTypeId, I.FlagPrimary
+                FROM ProductIdentifiers I
+                WHERE   {{ID:ProductId}}
+        query.prefix:   I
+        query.id:       [ "ProductId" ]
+        query.group:    [ "ProductId" ]
+        query.columns:  [ "ProductId", "IDValue", "IdentifierTypeId", "FlagPrimary" ]
+    TextsHash:
+        single:         true
+        query.sql: >
+            SELECT      T.EntityId, T.EntryCode, T.EntryId, T.TextLanguage, T.TextFormat, substr(T.TextContent, 1, 30),
+                        T.InRelationWithEntityType, T.InRelationWithEntityId, T.CorporateSource, T.SourceTitle
+                FROM    EntityTexts T
+                WHERE   T.EntityType = 'PROD' AND {{ID:EntityId}}
+        query.prefix:   T
+        query.id:       [ "EntityId" ]
+        query.key:      [ "ProductId", "EntryCode" ]
+        query.group:    [ "ProductId" ]
+        query.columns:  [ "ProductId", "EntryCode", "EntryId", "TextLanguage", "TextFormat", "TextContent",
+                          "InRelationWithEntityType", "InRelationWithEntityId", "CorporateSource", "SourceTitle" ]
+    TextsList:
+        query.sql: >
+            SELECT      T.EntityId, T.EntryCode, T.EntryId, T.TextLanguage, T.TextFormat, substr(T.TextContent, 1, 30),
+                        T.InRelationWithEntityType, T.InRelationWithEntityId, T.CorporateSource, T.SourceTitle
+                FROM    EntityTexts T
+                WHERE   T.EntityType = 'PROD' AND {{ID:EntityId}}
+        query.prefix:   T
+        query.id:       [ "EntityId" ]
+        query.group:    [ "ProductId" ]
+        query.columns:  [ "ProductId", "EntryCode", "EntryId", "TextLanguage", "TextFormat", "TextContent",
+                          "InRelationWithEntityType", "InRelationWithEntityId", "CorporateSource", "SourceTitle" ]
+

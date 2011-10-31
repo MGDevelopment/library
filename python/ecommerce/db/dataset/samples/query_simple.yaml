@@ -1,0 +1,14 @@
+---
+#
+# simple query example
+#
+# Get publishers from the Publishers table
+#
+query.sql: >
+    SELECT P.PublisherId, P.Name, P,FlagFixed, P.ReplaceWithThisId, P.FlagInvisible
+        FROM Publishers P
+        WHERE   {{PK.PublisherId}}
+query.prefix:   P
+query.id:       [ "PublisherId" ]
+query.key:      [ "PublisherId" ]
+query.columns:  [ "PublisherId", "Name", "FlagFixed", "ReplaceWithThisId", "FlagInvisible" ]

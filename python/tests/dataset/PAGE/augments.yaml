@@ -1,0 +1,48 @@
+---
+main_query:         &main_query
+    query.sql:      >
+        SELECT       P.ProductId, P.Title, P.Status
+            FROM     Products P
+            WHERE    P.ProductId IN ( {{VAR:productId}} )
+            ORDER BY P.ProductId
+    query.prefix:   I
+    query.id:       [ "ProductId" ]
+    query.key:      [ "ProductId" ]
+    query.output:   list
+    query.columns:  [ "ProductId", "Title", "Status" ]
+
+texts_query:        &texts_query
+    query.sql:      >
+        SELECT          T.ProductId, T.TextRole, T.TextContent
+            FROM        ProductTexts T
+            WHERE       T.ProductId IN ( {{VAR:productId}} )
+            ORDER BY    T.ProductId, T.TextRole
+    query.prefix:   T
+    query.id:       [ "ProductId" ]
+    query.group:    [ "ProductId" ]
+    query.columns:  [ "ProductId", "TextRole", "TextContent" ]
+
+#
+# the real query
+#
+single:                 true
+augment:
+    Set1:
+        <<:             *main_query      # get the main query
+        query.var:                       # set the vars
+            productId:  "1, 2"
+        query.augment:                   # augment with Texts
+            Texts:
+                <<:     *texts_query     # get the texts query
+                query.var:               # set the vars
+                    productId:  "1, 2"
+    Set2:
+        <<:             *main_query      # get the main query
+        query.var:                       # set the vars
+            productId:  "2, 3"
+        query.augment:                   # augment with Texts
+            Texts:
+                <<:     *texts_query     # get the texts query
+                query.var:               # set the vars
+                    productId:  "2, 3"
+

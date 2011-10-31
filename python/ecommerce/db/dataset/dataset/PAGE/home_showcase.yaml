@@ -1,0 +1,205 @@
+---
+###########################################################
+#
+# the dataset output is defined after the query_main and
+# augment_query_authors
+#
+###########################################################
+
+#
+# the master query
+#
+# Returns a list of the products that must be shown in each showcase
+#
+query_main:     &query_main
+    query.sql:  >
+        SELECT  P.ProductId                     AS ProductId,
+                -------------- title
+                PT.EffectiveTitle               AS Title,
+                -------------- links
+                PEUR.LinkBase                   AS LinkBase,
+                '/' || CAST(P.ProductId AS VARCHAR(32)) || '.jpg'
+                                                AS CoverSmall,
+                -------------- Comments and Ratings
+                CAST (  (ESR.Rating1Count * 1 + ESR.Rating2Count * 2 + ESR.Rating3Count * 3 + ESR.Rating4Count * 4 + ESR.Rating5Count * 5) /
+                        COALESCE(NULLIF(ESR.Rating1Count + ESR.Rating2Count + ESR.Rating3Count + ESR.Rating4Count + ESR.Rating5Count, 0), 1.0)
+                        AS DECIMAL(3, 2))
+                                                AS Rating,
+                ESR.Rating1Count + ESR.Rating2Count + ESR.Rating3Count + ESR.Rating4Count + ESR.Rating5Count
+                                                AS CommentCount,
+                -------------- Imprint
+                I.ImprintId                     AS ImprintId,
+                I.Name                          AS ImprintName,
+                IEUR.LinkBase                   AS ImprintURLBase,
+                -------------- Ranking????
+                'WHAT IS THIS?'                 AS Ranking,
+                -------------- Publishing Date
+                PSPDD.DateFormat                AS PublishingDateFormat,
+                PSPDD.DateValue                 AS PublishingDateValue,
+                COALESCE(PL.LanguageCode, 'es') AS LanguageCode,
+                -------------- Pages/Duration
+                PE.ExtentType                   AS ExtentType,
+                PE.ExtentUnit                   AS ExtentUnit,
+                PE.ExtentValue                  AS ExtentValue,
+                -------------- Product Form
+                PF.ProductForm                  AS ProductForm,
+                -------------- Availability and Price
+                PSD.FulfillmentType             AS FulfillmentType,
+                PSD.FulfillmentValue            AS FulfillmentValue,
+                PSDP.CurrencyCode               AS CurrencyCode,
+                PSDP.PriceAmount                AS PriceAmount
+            FROM        EntityRelatedEntities ERE
+            -------------- Product Info
+            INNER JOIN  Products P
+                ON      ERE.RelatedEntityId = P.ProductId AND
+                        P.FlagDeleted = false
+            -------------- Product Form
+            INNER JOIN  ProductForm PF
+                ON      P.ProductId = PF.ProductId
+            -------------- Language
+            LEFT JOIN   ProductLanguages PL
+                ON      P.ProductId = PL.ProductId AND
+                        PL.LanguageRole = '01'
+            -------------- Title
+            INNER JOIN  ProductTitles PT
+                ON      P.ProductId = PT.ProductId AND
+                        PT.TitleType = '01' AND
+                        PT.EffectiveLanguageCode = 'es'
+            -------------- Comments and Ratings
+            LEFT JOIN   EntitySnapshotRatings ESR
+                ON      ESR.EntityType = 'PROD' AND
+                        P.ProductId = ESR.EntityId
+            -------------- Publishing Date
+            LEFT JOIN   ProductSupplyPublishingDetailDates PSPDD
+                ON      P.ProductId = PSPDD.ProductId AND
+                        PSPDD.DateRole = '01'
+            -------------- Availability and Price
+            INNER JOIN  ProductSupplyDetail PSD
+                ON      P.ProductId = PSD.ProductId
+            LEFT JOIN   ProductSupplyDetailPrice PSDP
+                ON      PSD.ProductId = PSDP.ProductId
+            -------------- Pages/Duration
+            LEFT JOIN   ProductExtents PE
+                ON      P.ProductId = PE.ProductId AND
+                        PE.ExtentType = (SELECT     MIN(PE2.ExtentType)
+                                            FROM    ProductExtents PE2
+                                            WHERE   PE2.ProductId = P.ProductId)
+            -------------- Imprint
+            LEFT JOIN   ProductImprints PI
+                ON      P.ProductId = PI.ProductId AND
+                        PI.EntryOrder = 0
+            LEFT JOIN   Imprints I
+                ON      PI.ImprintId = I.ImprintId AND
+                        I.FlagDeleted = false
+            LEFT JOIN   EntityURLs IEU
+                ON      IEU.EntityType = 'IMPR' AND
+                        IEU.EntityId = I.ImprintId
+            LEFT JOIN   URLs IEUR
+                ON      IEU.URLId = IEUR.URLId
+            -------------- Link and Cover
+            LEFT JOIN   URLs PEUR
+                ON      PEUR.URLId = (SELECT    MIN(PEUR.URLId)
+                                        FROM    EntityURLs PEUR
+                                        WHERE   PEUR.EntityType = 'PROD' AND
+                                                PEUR.EntityId = P.ProductId)
+            -------------- main condition
+            WHERE       ERE.EntityType = 'SUBJ' AND
+                        ERE.EntityId = {{VAR:subjectId}} AND
+                        ERE.EntityRelationCode = 'YV' AND
+                        ERE.RelatedEntityType = 'PROD'
+            ORDER BY    ERE.EntryOrder
+            LIMIT       24
+    query.prefix:   I
+    query.id:       [ "ProductId" ]
+    query.key:      [ "ProductId" ]
+    query.output:   list
+    query.columns:  [ "ProductId", "Title", "LinkBase", "CoverSmall", "Rating", "CommentCount", 
+                      "ImprintId", "ImprintName", "ImprintURLBase", "Ranking",
+                      "PublishingDateFormat", "PublishingDateValue", "LanguageCode",
+                      "ExtentType", "ExtentUnit", "ExtentValue", "ProductForm",
+                      "FulfillmentType", "FulfillmentValue",
+                      "CurrencyCode", "PriceAmount" ]
+#
+# the Authors query
+#
+# Returns a list of the authors for each product that must be shown in each showcase
+#
+augment_query_authors:  &augment_query_authors
+    query.sql:  >
+        SELECT          PC.ProductId                AS ProductId,
+                        PC.EntryOrder               AS EntryOrder,
+                        PC.ContributorRole          AS ContributorRole,
+                        C.ContributorId             AS ContributorId,
+                        C.PersonName                AS PersonName,
+                        EUR.LinkBase                AS LinkBase
+                FROM        ProductContributors PC
+                -------------- Contributor
+                INNER JOIN  Contributors C
+                    ON      PC.ContributorId = C.ContributorId
+                -------------- Link
+                LEFT JOIN   URLs EUR
+                    ON      EUR.URLId = (SELECT     MIN(CEUR.URLId)
+                                            FROM    EntityURLs CEUR
+                                            WHERE   CEUR.EntityType = 'CONT' AND
+                                                    CEUR.EntityId = C.ContributorId)
+                -------------- Main condition
+                WHERE       PC.ProductId IN (
+                                SELECT          ERE.RelatedEntityId
+                                    FROM        EntityRelatedEntities ERE
+                                    WHERE       ERE.EntityType = 'SUBJ' AND
+                                                ERE.EntityId = {{VAR:subjectId}} AND
+                                                ERE.EntityRelationCode = 'YV' AND
+                                                ERE.RelatedEntityType = 'PROD'
+                                    ORDER BY    ERE.EntryOrder
+                                    LIMIT       24) AND
+                            PC.ContributorRole IN ('A01', 'D02', 'E01')
+                ORDER BY    PC.ProductId, PC.EntryOrder
+    query.prefix:   PC
+    query.id:       [ "ProductId" ]
+    query.group:    [ "ProductId" ]
+    query.columns:  [ "ProductId", "EntryOrder", "ContributorRole", "ContributorId",
+                      "PersonName", "LinkBase" ]
+
+#
+# expand
+#
+# Get showcase for home page
+#
+single:                 true
+augment:
+    Books:
+        <<:             *query_main      # get the main query
+        query.var:                       # set the vars
+            subjectId:  "{{CONFIG:constants.content.categories.books.subjectid}}"
+        query.augment:                   # augment with Authors
+            Authors:
+                <<:     *augment_query_authors   # get the authors query
+                query.var:               # set the vars
+                    subjectId:  "{{CONFIG:constants.content.categories.books.subjectid}}"
+    Movies:
+        <<:             *query_main      # get the main query
+        query.var:                       # set the vars
+            subjectId:  "{{CONFIG:constants.content.categories.movies.subjectid}}"
+        query.augment:                   # augment with Authors
+            Authors:
+                <<:     *augment_query_authors   # get the authors query
+                query.var:               # set the vars
+                    subjectId:  "{{CONFIG:constants.content.categories.movies.subjectid}}"
+    Music:
+        <<:             *query_main      # get the main query
+        query.var:                       # set the vars
+            subjectId:  "{{CONFIG:constants.content.categories.music.subjectid}}"
+        query.augment:                   # augment with Authors
+            Authors:
+                <<:     *augment_query_authors   # get the authors query
+                query.var:               # set the vars
+                    subjectId:  "{{CONFIG:constants.content.categories.music.subjectid}}"
+    Games:
+        <<:             *query_main      # get the main query
+        query.var:                       # set the vars
+            subjectId:  "{{CONFIG:constants.content.categories.games.subjectid}}"
+        query.augment:                   # augment with Authors
+            Authors:
+                <<:     *augment_query_authors   # get the authors query
+                query.var:               # set the vars
+                    subjectId:  "{{CONFIG:constants.content.categories.games.subjectid}}"

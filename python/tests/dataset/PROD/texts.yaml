@@ -1,0 +1,44 @@
+---
+query.sql: >
+    SELECT       P.ProductId, P.Title, P.Status
+        FROM     Products P
+        WHERE    {{ID:ProductId}}
+        ORDER BY P.ProductId
+query.prefix:   P
+query.id:       [ "ProductId" ]
+query.key:      [ "ProductId" ]
+query.columns:  [ "ProductId", "Title", "Status" ]
+query.augment:
+    Identifiers:
+        query.sql: >
+            SELECT       I.ProductId, I.IDValue
+                FROM     ProductIdentifiers I
+                WHERE    {{ID:ProductId}}
+                ORDER BY I.ProductId, I.IDValue
+        query.prefix:   I
+        query.id:       [ "ProductId" ]
+        query.group:    [ "ProductId" ]
+        query.columns:  [ "ProductId", "IDValue" ]
+    TextsHash:
+        single:         true
+        query.sql: >
+            SELECT          T.ProductId, T.TextRole, T.TextContent
+                FROM        ProductTexts T
+                WHERE       {{ID:ProductId}}
+                ORDER BY    T.ProductId, T.TextRole
+        query.prefix:   T
+        query.id:       [ "ProductId" ]
+        query.group:    [ "ProductId" ]
+        query.key:      [ "ProductId", "TextRole" ]
+        query.columns:  [ "ProductId", "TextRole", "TextContent" ]
+    TextsList:
+        query.sql: >
+            SELECT          T.ProductId, T.TextRole, T.TextContent
+                FROM        ProductTexts T
+                WHERE       {{ID:ProductId}}
+                ORDER BY    T.ProductId, T.TextRole
+        query.prefix:   T
+        query.id:       [ "ProductId" ]
+        query.group:    [ "ProductId" ]
+        query.columns:  [ "ProductId", "TextRole", "TextContent" ]
+

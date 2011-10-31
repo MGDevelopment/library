@@ -1,0 +1,19 @@
+---
+query.sql: >
+    SELECT P.PublisherId, P.Name, P.FlagFixed, P.ReplaceWithThisId, P.FlagInvisible
+        FROM Publishers P
+        WHERE   {{PK:PublisherId}}
+query.prefix:   P
+query.id:       [ "PublisherId" ]
+query.key:      [ "PublisherId" ]
+query.columns:  [ "PublisherId", "Name", "FlagFixed", "ReplaceWithThisId", "FlagInvisible" ]
+query.augment:
+    Identifiers:
+        query.sql: >
+            SELECT I.PublisherId, I.IDValue, I.IdentifierTypeId, I.FlagPrimary
+                FROM PublisherIdentifiers I
+                WHERE   {{PK:PublisherId}}
+        query.prefix:   I
+        query.id:       [ "PublisherId" ]
+        query.group:    [ "PublisherId" ]
+        query.columns:  [ "PublisherId", "IDValue", "IdentifierTypeId", "FlagPrimary" ]
