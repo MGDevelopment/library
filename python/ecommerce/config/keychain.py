@@ -50,7 +50,7 @@ class Keychain(object):
 
         # get the config
         self._fileName = config.get("keychain.file")
-        self._dirNames = config.get("keychain.dirs")
+        self._dirNames = config.get("keychain.dirs", [ ])
 
         # find and load the keychain file
         self._fullPath = self._keychainFind()
@@ -69,12 +69,18 @@ class Keychain(object):
             # if exists, return that
             if exists(fullPath):
                 return fullPath
+
         # fail
-        raise IOError('Keychain file [%s] not found' % self._fileName)
+        #####raise IOError('Keychain file [%s] not found' % self._fileName)
+        return None
 
 
     def _keychainLoad(self):
         """Loads the keychain file"""
+
+        # only if it makes sense
+        if self._fullPath is None:
+            return { }      # empty keychain
 
         # read the file content
         f = open(self._fullPath, "r")

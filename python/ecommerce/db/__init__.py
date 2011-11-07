@@ -76,6 +76,13 @@ def getConnection(dbname = None):
 
     return _modules[module]["connect"](**dbDef["params"])
 
+
+def getDefaultDB():
+    """Return the default database"""
+
+    return _defaultDB
+
+
 def _init(config = None):
     """Initialize the module
 
@@ -95,7 +102,7 @@ def _init(config = None):
     # 2: process each module in "db.modules"
     modules = { }
     try:
-        mDef = config.get("db.python")
+        mDef = config.get("db.python", { })
     except:
         raise DBConfigurationException("Cannot find 'db.python' configuration entry")
     for m in mDef:
@@ -108,7 +115,7 @@ def _init(config = None):
     # 3: process each database in "db.databases" (set default if none)
     databases = { }
     try:
-        dblist = config.get("db.databases")
+        dblist = config.get("db.databases", { })
     except:
         raise DBConfigurationException("Cannot find 'db.databases' configuration entry")
     for db in dblist:
