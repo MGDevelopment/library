@@ -24,6 +24,7 @@ global_db:          &global_db
         engine:     sqlite                  # db engine
         python:     sqlite3                 # python module (will import and use "connect")
         database:   /tmp/testdb             # params
+        loosetypes: true                    # column types are not rigid
 #
 # keychain config
 #

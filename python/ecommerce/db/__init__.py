@@ -44,6 +44,22 @@ class DBRuntimeException(DBException):
     """
     pass
 
+def hasLooseTypes(dbname = None):
+    """Indicates if the named database has loose (SQLite3) or strict (Postgres) types."""
+
+    # use default db if none passed
+    if dbname is None:
+        dbname = _defaultDB
+
+    # get the db definition
+    if dbname not in _databases:
+        raise DBRuntimeException("Unknown database [%s]" % dbname)
+    dbDef = _databases[dbname]
+
+    # get the loosetypes attribute (default to False)
+    return dbDef["def"].get("loosetypes", False)
+
+
 def getConnection(dbname = None):
     """Return a connection to the named database."""
 
@@ -170,4 +186,5 @@ def initialize(config = None):
 initialize()
 
 # public methods
-__all__ = [ "getConnection", "dataset" ]
+__all__ = [ "getConnection", "hasLooseTypes", "dataset" ]
+
