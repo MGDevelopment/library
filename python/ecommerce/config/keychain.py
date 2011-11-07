@@ -30,8 +30,8 @@ class Keychain(object):
 
     Keys are accessed by name. The method "fetch" receives a key name and
     returns the decrypted password. Key names are represented by a string
-    of the form "keychain:{keyname}". If the method "fetch" receives an
-    input that does not conform to that syntax, it returns the same value.
+    of the form "keychain:{keyname}:{value}". If the method "fetch" receives
+    an input that does not conform to that syntax, it returns the same value.
     This allows for keys to be stored cleartext in config files without
     requiring the application to be aware of which keys are encrypted.
     The application can just get the password attribute and pass the value
@@ -94,7 +94,7 @@ class Keychain(object):
     def fetch(self, key):
         """Fetches the given key from the keychain
 
-        If key does not conform to the syntax "keychain:{keyname}"
+        If key does not conform to the syntax "keychain:{keyname}:{value}"
         it is returned without any change. If the key named "{keyname}"
         is not found, an KeyError exception is raised
         """
@@ -103,8 +103,8 @@ class Keychain(object):
         if not key.startswith("keychain:"):
             return key
 
-        # get the key name
-        keyName = key[len("keychain:"):]
+        # get the key parts
+        (protocol, keyName, keyValue) = key.split(":")
 
         # if the key is not in the keychain, raise
         if keyName not in self._keychain:
@@ -112,6 +112,11 @@ class Keychain(object):
 
         # TODO - complete this with algorithms to fetch the real password
 
+        # check there is a "data" element
+        keyData = self._keychain[keyName]
+        if "data" not in keyData:
+            raise KeyError("Keychain Key [%s] has no data" % keyName)
+
         # for now, return the value as is
-        return self._keychain[keyName]["value"]
+        return self._keychain[keyName]["data"].get(keyValue)
 

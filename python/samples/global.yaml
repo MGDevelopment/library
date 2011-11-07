@@ -18,7 +18,7 @@ global_db:          &global_db
         host:       localhost               # params
         port:       5432
         user:       ecommerce
-        password:   keychain:eCommerce-db   # notice the keychain usage
+        password:   keychain:eCommerce-db:password   # notice the keychain usage
         database:   ecommerce
     test:           &global_db_test         # base definition of test db
         engine:     sqlite                  # db engine
