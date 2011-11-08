@@ -1,0 +1,18 @@
+---
+query.sql: >
+    SELECT       P.ProductId, P.Title, P.Status
+        FROM     Products P
+        WHERE    {{ID:ProductId}}
+        ORDER BY P.ProductId
+query.prefix:   P
+query.id:       [ "ProductId" ]
+query.key:      [ "ProductId" ]
+query.columns:  [ "ProductId", "Title", "Status" ]
+query.augment:
+    TotalCount:
+        query.sql:      >
+            SELECT          COUNT(*), MIN(P.ProductId), MAX(P.ProductId)
+                FROM        Products P
+        query.prefix:   P
+        query.static:   true
+        query.columns:  [ "Total", "Min", "Max" ]

@@ -142,6 +142,47 @@ result_1 = [
     } )
 ]
 
+result_2 = [
+    ############# Page 1
+    ( 'PAGE', 1, False, {
+        'Set1': [
+            { 'ProductId': 1,
+              'Status': u'OK',
+              'Texts': [
+                  { 'ProductId': 1, 'TextContent': u'text for 1/01', 'TextRole': u'01' },
+                  { 'ProductId': 1, 'TextContent': u'text for 1/18', 'TextRole': u'18' },
+                  { 'ProductId': 1, 'TextContent': u'text for 1/26', 'TextRole': u'26' }
+              ],
+              'Title': u'Title 1'},
+            { 'ProductId': 2,
+              'Status': u'ER',
+              'Texts': None,
+              'Texts': [
+                  { 'ProductId': 2, 'TextContent': u'text for 2/01', 'TextRole': u'01' },
+                  { 'ProductId': 2, 'TextContent': u'text for 2/18', 'TextRole': u'18' }
+              ],
+              'Title': u'Title 2'}
+        ],
+        'Set2': [
+            { 'ProductId': 2,
+              'Status': u'ER',
+              'Texts': [
+                  { 'ProductId': 2, 'TextContent': u'text for 2/01', 'TextRole': u'01' },
+                  { 'ProductId': 2, 'TextContent': u'text for 2/18', 'TextRole': u'18' }
+              ],
+              'Title': u'Title 2'
+            },
+            { 'ProductId': 3,
+              'Status': u'OK',
+              'Texts': [
+                  { 'ProductId': 3, 'TextContent': u'text for 3/01', 'TextRole': u'01' }
+              ],
+              'Title': u'Title 3'
+            }
+        ]
+    } )
+]
+
 result_coerce = [
     ############# Product 1
     ( 'PROD', 1, False, {
@@ -181,44 +222,42 @@ result_coerce = [
     } )
 ]
 
-result_2 = [
-    ############# Page 1
-    ( 'PAGE', 1, False, {
-        'Set1': [
-            { 'ProductId': 1,
-              'Status': u'OK',
-              'Texts': [
-                  { 'ProductId': 1, 'TextContent': u'text for 1/01', 'TextRole': u'01' },
-                  { 'ProductId': 1, 'TextContent': u'text for 1/18', 'TextRole': u'18' },
-                  { 'ProductId': 1, 'TextContent': u'text for 1/26', 'TextRole': u'26' }
-              ],
-              'Title': u'Title 1'},
-            { 'ProductId': 2,
-              'Status': u'ER',
-              'Texts': None,
-              'Texts': [
-                  { 'ProductId': 2, 'TextContent': u'text for 2/01', 'TextRole': u'01' },
-                  { 'ProductId': 2, 'TextContent': u'text for 2/18', 'TextRole': u'18' }
-              ],
-              'Title': u'Title 2'}
-        ],
-        'Set2': [
-            { 'ProductId': 2,
-              'Status': u'ER',
-              'Texts': [
-                  { 'ProductId': 2, 'TextContent': u'text for 2/01', 'TextRole': u'01' },
-                  { 'ProductId': 2, 'TextContent': u'text for 2/18', 'TextRole': u'18' }
-              ],
-              'Title': u'Title 2'
-            },
-            { 'ProductId': 3,
-              'Status': u'OK',
-              'Texts': [
-                  { 'ProductId': 3, 'TextContent': u'text for 3/01', 'TextRole': u'01' }
-              ],
-              'Title': u'Title 3'
-            }
-        ]
+result_static = [
+    ############# Product 1
+    ( 'PROD', 1, False, {
+        'ProductId': 1,
+        'Status': u'OK',
+        'Title': u'Title 1',
+        'TotalCount': {
+            'Max': 4, 'Min': 1, 'Total': 4
+        }
+    } ),
+    ############# Product 2
+    ( 'PROD', 2, False, {
+        'ProductId': 2,
+        'Status': u'ER',
+        'Title': u'Title 2',
+        'TotalCount': {
+            'Max': 4, 'Min': 1, 'Total': 4
+        }
+    } ),
+    ############# Product 3
+    ( 'PROD', 3, False, {
+        'ProductId': 3,
+        'Status': u'OK',
+        'Title': u'Title 3',
+        'TotalCount': {
+            'Max': 4, 'Min': 1, 'Total': 4
+        }
+    } ),
+    ############# Product 4
+    ( 'PROD', 4, False, {
+        'ProductId': 4,
+        'Status': u'ER',
+        'Title': u'Title 4',
+        'TotalCount': {
+            'Max': 4, 'Min': 1, 'Total': 4
+        }
     } )
 ]
 
@@ -263,6 +302,19 @@ class TestSequenceFunctions(TestCase):
         self.assertEqual(result, result_1, "Dataset returned different data")
 
 
+    def test_2(self):
+        """Test a dataset with augments only"""
+
+        import pprint
+        entities = [
+            ("PAGE", 1, "augments")
+        ]
+        result = ecommerce.db.dataset.fetch(entities)
+        self.assertEqual(result, result_2, "Dataset returned different data")
+
+        pass
+
+
     def test_coerce(self):
         """Test a query with type coercion"""
 
@@ -276,15 +328,15 @@ class TestSequenceFunctions(TestCase):
         self.assertEqual(result, result_coerce, "Dataset returned different data")
 
 
-    def test_2(self):
-        """Test a dataset with augments only"""
+    def test_static(self):
+        """Test a query with static augment"""
 
-        import pprint
         entities = [
-            ("PAGE", 1, "augments")
+            ("PROD", 1, "static"),
+            ("PROD", 2, "static"),
+            ("PROD", 3, "static"),
+            ("PROD", 4, "static")
         ]
         result = ecommerce.db.dataset.fetch(entities)
-        self.assertEqual(result, result_2, "Dataset returned different data")
-
-        pass
+        self.assertEqual(result, result_static, "Dataset returned different data")
 

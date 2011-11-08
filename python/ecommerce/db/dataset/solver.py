@@ -132,6 +132,9 @@ def solveQuery(dataset, entityType, datasetName, idList):
     # get the output format
     format = dataset.get("query.output")
 
+    # figure out if query is static
+    isStatic = dataset.get("query.static", False)
+
     # get the group columns list
     group = dataset.get("query.group", [ ])
     group = [ columns.index(key) if key in columns else -1 for key in group ]
@@ -215,8 +218,12 @@ def solveQuery(dataset, entityType, datasetName, idList):
                 augmentData = None
                 if grouping:
                     augmentData = augment[a][gKey] if gKey in augment[a] else None
+                    if augmentData is None and augment[a]["__all__"] is not None:
+                        augmentData = augment[a]["__all__"]
                 if keying:
                     augmentData = augment[a][kKey] if kKey in augment[a] else None
+                    if augmentData is None and augment[a]["__all__"] is not None:
+                        augmentData = augment[a]["__all__"]
                 row[a] = augmentData
 
         # add the row to the result
@@ -244,6 +251,10 @@ def solveQuery(dataset, entityType, datasetName, idList):
     # close cursor and connection
     cursor.close()
     conn.close()
+
+    # if query is static, return element 0 as "__all__" 
+    if isStatic:
+       result = { "__all__" : result[0] }
 
     return result
 
