@@ -1,0 +1,19 @@
+---
+query.sql: >
+    SELECT       P.ProductId, P.Title, P.Status, P.CoerceBool, P.CoerceDatetime, P.CoerceFloat
+        FROM     Products P
+        WHERE    {{ID:ProductId}}
+        ORDER BY P.ProductId
+query.prefix:   P
+query.id:       [ "ProductId" ]
+query.key:      [ "ProductId" ]
+query.columns:  [ "ProductId", "Title", "Status", "CoerceBool", "CoerceDatetime", "CoerceFloat" ]
+query.coerce:
+    bool:       [ CoerceBool ]
+    CoerceDatetime:
+        type:   datetime
+        mode:   ok-or-none
+    CoerceFloat:
+        type:   double
+        mode:   ok-or-none
+

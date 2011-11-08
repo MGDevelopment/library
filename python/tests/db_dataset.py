@@ -1,10 +1,13 @@
-import ecommerce.config
-import ecommerce.db
-import ecommerce.db.dataset
-import sqlite3
+
 from unittest         import TestCase
 from tempfile         import mkdtemp
 from shutil           import rmtree
+import sqlite3
+import datetime
+
+import ecommerce.config
+import ecommerce.db
+import ecommerce.db.dataset
 
 #
 # Test configuration files
@@ -20,6 +23,7 @@ db:
         module:     sqlite
         python:     sqlite3
         database:   <<DIR>>/testdb
+        loosetypes: true                    # column types are not rigid
     dataset:                                # base definition for dataset module
         loader:     folder                  # folder loading
         database:   test                    # the default database
@@ -34,9 +38,12 @@ setup_sentences = [
     ########### the main product table
     """
     create table Products(
-        ProductId     INT NOT NULL,
-        Title         VARCHAR(256) NOT NULL,
-        Status        CHAR(2) NOT NULL,
+        ProductId        INT NOT NULL,
+        Title            VARCHAR(256) NOT NULL,
+        Status           CHAR(2) NOT NULL,
+        CoerceBool       BOOLEAN NOT NULL,
+        CoerceDatetime   TIMESTAMP NOT NULL,
+        CoerceFloat      FLOAT NULL,
         PRIMARY KEY (ProductId)
     )
     """,
@@ -58,9 +65,14 @@ setup_sentences = [
     )
     """,
     ########### Products Data
-    "INSERT INTO Products(ProductId, Title, Status) VALUES(1, 'Title 1', 'OK')",
-    "INSERT INTO Products(ProductId, Title, Status) VALUES(2, 'Title 2', 'ER')",
-    "INSERT INTO Products(ProductId, Title, Status) VALUES(3, 'Title 3', 'OK')",
+    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat) "
+           "VALUES(1, 'Title 1', 'OK', 1,       '2011-12-02T16:34:45.453Z', NULL)",
+    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat) "
+           "VALUES(2, 'Title 2', 'ER', 'false', 'sometime',                 9.15)",
+    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat) "
+           "VALUES(3, 'Title 3', 'OK', 6.65,    93,                         '-9324.10')",
+    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat) "
+           "VALUES(4, 'Title 4', 'ER', 'false', 'sometime',                 'abc')",
     ########### ProductIdentifiers Data
     "INSERT INTO ProductIdentifiers(ProductId, IDValue) VALUES(1, '8050443322')",
     "INSERT INTO ProductIdentifiers(ProductId, IDValue) VALUES(1, '97880504433221')",
@@ -127,6 +139,45 @@ result_1 = [
             {'ProductId': 3, 'TextContent': u'text for 3/01', 'TextRole': u'01' }
         ],
         'Title': u'Title 3'
+    } )
+]
+
+result_coerce = [
+    ############# Product 1
+    ( 'PROD', 1, False, {
+        'CoerceBool': True,
+        'CoerceDatetime': datetime.datetime(2011, 12, 2, 16, 34, 45, 453000),
+        'CoerceFloat': None,
+        'ProductId': 1,
+        'Status': u'OK',
+        'Title': u'Title 1'
+    } ),
+    ############# Product 2
+    ( 'PROD', 2, False, {
+        'CoerceBool': False,
+        'CoerceDatetime': None,
+        'CoerceFloat': 9.15,
+        'ProductId': 2,
+        'Status': u'ER',
+        'Title': u'Title 2'
+    } ),
+    ############# Product 3
+    ( 'PROD', 3, False, {
+        'CoerceBool': 6.65,
+        'CoerceDatetime': None,
+        'CoerceFloat': -9324.1,
+        'ProductId': 3,
+        'Status': u'OK',
+        'Title': u'Title 3'
+    } ),
+    ############# Product 3
+    ( 'PROD', 4, False, {
+        'CoerceBool': False,
+        'CoerceDatetime': None,
+        'CoerceFloat': None,
+        'ProductId': 4,
+        'Status': u'ER',
+        'Title': u'Title 4'
     } )
 ]
 
@@ -210,6 +261,19 @@ class TestSequenceFunctions(TestCase):
         ]
         result = ecommerce.db.dataset.fetch(entities)
         self.assertEqual(result, result_1, "Dataset returned different data")
+
+
+    def test_coerce(self):
+        """Test a query with type coercion"""
+
+        entities = [
+            ("PROD", 1, "coerce"),
+            ("PROD", 2, "coerce"),
+            ("PROD", 3, "coerce"),
+            ("PROD", 4, "coerce")
+        ]
+        result = ecommerce.db.dataset.fetch(entities)
+        self.assertEqual(result, result_coerce, "Dataset returned different data")
 
 
     def test_2(self):
