@@ -104,7 +104,10 @@ class Keychain(object):
             return key
 
         # get the key parts
-        (protocol, keyName, keyValue) = key.split(":")
+        parts = key.split(":")
+        if len(parts) != 3:
+            raise KeyError("Key [%s] is not a valid keychain id" % key)
+        (protocol, keyName, keyValue) = (parts[0], parts[1], parts[2])
 
         # if the key is not in the keychain, raise
         if keyName not in self._keychain:

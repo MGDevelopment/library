@@ -40,16 +40,19 @@ keychain_conf = """
 #
 master-key:
     # some hexa value
-    value:      44335522661177
-    algorithm:  master-key
+    data:
+        password:    44335522661177
+    algorithm:       master-key
 master-db:
-    value:      somekey
+    data:
+        key:         somekey
     algorithm:
 some-other-key:
     # some hexa value
-    value:      44335522661177
-    algorithm:  3DES-cbc
-    key:        master-key
+    data:
+        value:       44335522661177
+    algorithm:       3DES-cbc
+    key:             master-key
 """
 
 testConfig = { "global" : global_conf, "local" : local_conf }
@@ -156,7 +159,7 @@ class TestSequenceFunctions(TestCase):
 
     def test_keychain_key(self):
         """Test fetch for a key syntax (keychain:{{keyname}})"""
-        self.assertEqual(self.getLocalConfig().keychain.fetch("keychain:master-db"), "somekey",
+        self.assertEqual(self.getLocalConfig().keychain.fetch("keychain:master-db:key"), "somekey",
                          "failed fetch with conformant key")
 
     def test_keychain_keyinvalid(self):
