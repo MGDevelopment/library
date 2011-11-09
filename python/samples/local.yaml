@@ -13,6 +13,8 @@ db:
         <<:         *global_db_test
     dataset:                                # configuration of the dataset module
         <<:         *global_db_dataset
+    codetables:                             # configuration for the codetables module
+        <<:         *global_db_codetables
 
 #
 # keychain config
