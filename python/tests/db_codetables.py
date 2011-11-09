@@ -111,6 +111,13 @@ data_1 = [
         'field1': '02',
         'field2': 'R',
         'field3': 'def'
+    },
+    ################# ENTRY 3
+    {
+        'id': 789,
+        'field1': '02',
+        'field2': None,
+        'field3': None
     }
 ]
 
@@ -140,6 +147,19 @@ result_1 = [
         'field2._list': 'User.User',
         'field3': 'def',
         'field3._desc': 'def',
+        'field3._list': 'Invalid.List'
+    },
+    ################# ENTRY 3
+    {
+        'id': 789,
+        'field1': '02',
+        'field1._desc': 'ISSN',
+        'field1._list': 'ONIX.13',
+        'field2': None,
+        'field2._desc': None,
+        'field2._list': 'User.User',
+        'field3': None,
+        'field3._desc': None,
         'field3._list': 'Invalid.List'
     }
 ]
