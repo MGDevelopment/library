@@ -18,6 +18,9 @@ type and a coercion submode:
   returned). This is the DEFAULT mode
 - "ok-or-none" (if the type cannot be coerced, None is returned)
 - "ok-or-fail" (if the type cannot be coerced, and exception is raised)
+- "loose" is an alias of "best"
+- "strict" is an alias of "ok-or-none"
+- "ok-or-null" is an alias of "ok-or-none"
 
 For example:
 
@@ -64,7 +67,7 @@ def _handleMode(value, type, mode):
     if mode == "ok-or-fail":
         raise DBDatasetRuntimeException(
              "Cannot coerce value [%s] to type [%s]" % (value, type))
-    if mode == "ok-or-none" or mode == "ok-or-null":
+    if mode == "ok-or-none" or mode == "ok-or-null" or mode == "strict":
         return None
 
     # assume best mode
