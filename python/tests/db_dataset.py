@@ -262,6 +262,50 @@ result_static = [
 ]
 
 
+result_code = [
+    ############# Product 1
+    ( 'PROD', 1, False, {
+        'HashValue': 'c4ca4238a0b923820dcc509a6f75849b',
+        'ProductId': 1,
+        'Status': u'OK',
+        'Title': u'Title 1',
+        'TotalCount': {
+            'Max': 4, 'Min': 1, 'Total': 4
+        }
+    } ),
+    ############# Product 2
+    ( 'PROD', 2, False, {
+        'HashValue': 'c81e728d9d4c2f636f067f89cc14862c',
+        'ProductId': 2,
+        'Status': u'ER',
+        'Title': u'Title 2',
+        'TotalCount': {
+            'Max': 4, 'Min': 1, 'Total': 4
+        }
+    } ),
+    ############# Product 3
+    ( 'PROD', 3, False, {
+        'HashValue': 'eccbc87e4b5ce2fe28308fd9f2a7baf3',
+        'ProductId': 3,
+        'Status': u'OK',
+        'Title': u'Title 3',
+        'TotalCount': {
+            'Max': 4, 'Min': 1, 'Total': 4
+        }
+    } ),
+    ############# Product 4
+    ( 'PROD', 4, False, {
+        'HashValue': 'a87ff679a2f3e71d9181a67b7542122c',
+        'ProductId': 4,
+        'Status': u'ER',
+        'Title': u'Title 4',
+        'TotalCount': {
+            'Max': 4, 'Min': 1, 'Total': 4
+        }
+    } )
+]
+
+
 class TestSequenceFunctions(TestCase):
 
     def setUp(self):
@@ -339,4 +383,17 @@ class TestSequenceFunctions(TestCase):
         ]
         result = ecommerce.db.dataset.fetch(entities)
         self.assertEqual(result, result_static, "Dataset returned different data")
+
+
+    def test_code(self):
+        """Test a query with code augment"""
+
+        entities = [
+            ("PROD", 1, "code"),
+            ("PROD", 2, "code"),
+            ("PROD", 3, "code"),
+            ("PROD", 4, "code")
+        ]
+        result = ecommerce.db.dataset.fetch(entities)
+        self.assertEqual(result, result_code, "Dataset returned different data")
 

@@ -11,6 +11,7 @@ by Jose Luis Campanello
 import os
 import os.path
 import platform
+import importlib
 import yaml
 import types
 
@@ -23,6 +24,9 @@ from coercion import performCoercion
 
 # default database
 _defaultDB = None
+
+# imported code libraries
+_code = { }
 
 
 def solve(dataset, entityType, datasetName, idList):
@@ -75,6 +79,9 @@ def solveMain(dataset, entityType, datasetName, idList):
     result = None
 
     # figure out if solving for query or code (if any at all)
+    #
+    # NOTE: check for query first because is the most used
+    #
     if dataset.get("query.sql") is not None:
         # execute the query and import the result
         result = solveQuery(dataset, entityType, datasetName, idList)
@@ -323,6 +330,7 @@ def solveQuerySQL(dataset, entityType, datasetName, idList):
 
     return sql
 
+
 def solveCode(dataset, entityType, datasetName, idList):
     """Solve the code definition
 
@@ -330,12 +338,53 @@ def solveCode(dataset, entityType, datasetName, idList):
     the value is the data associated to that key.
     """
 
-    #
-    # TODO - COMPLETE THIS
-    #
+    global _code
 
-    # return some empty result
-    return { } if dataset.get("single", False) else { i : None for i in idList }
+    # get the code entry
+    qualified = dataset.get("code.name")   # cannot be none because we are here!
+    parts = qualified.rsplit(".", 1)
+    if len(parts) != 2:
+        raise DBDatasetRuntimeException(
+              "Invalid qualified function name [%s]" % qualified)
+
+    # get the parts
+    (module, function) = (parts[0], parts[1])
+
+    # if module is not in the cache, import it
+    if module not in _code:
+
+        # initialize the cache entry
+        _code[module] = { "module" : None, "functions" : { } }
+
+        # try the import (ignore exceptions)
+        try:
+            _code[module]["module"] = importlib.import_module(module)
+        except:
+            pass
+    if _code[module]["module"] is None:
+        raise DBDatasetRuntimeException(
+              "Module [%s] cannot be imported" % module)
+
+    # if function not in cache, get it
+    if function not in _code[module]["functions"]:
+
+        # initialize the entry
+        _code[module]["functions"][function] = None
+
+        # try to get the object (ignore exceptions)
+        try:
+            _code[module]["functions"][function] = getattr(_code[module]["module"], function)
+        except:
+            pass
+    if _code[module]["functions"][function] is None:
+        raise DBDatasetRuntimeException(
+              "Module [%s] does not have a function [%s]" % (module, function))
+
+    # now, invoke the function
+    result = _code[module]["functions"][function](dataset, entityType, datasetName, idList)
+
+    # return the result
+    return result
 
 
 def solverInitialize(config = None):
@@ -345,6 +394,7 @@ def solverInitialize(config = None):
     """
 
     global _defaultDB
+    global _code
 
     # instantiate the appropriate loader
     if config is None:
@@ -352,3 +402,5 @@ def solverInitialize(config = None):
 
     _defaultDB = config.get("db.dataset.database", ecommerce.db.getDefaultDB())
 
+    # reset the imported library cache
+    _code = { }
