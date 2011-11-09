@@ -1,0 +1,12 @@
+---
+query.sql: >
+    SELECT       P.ProductId, P.Title, P.Status, P.List1, P.List2, P.List3
+        FROM     Products P
+        WHERE    {{ID:ProductId}}
+        ORDER BY P.ProductId
+query.prefix:    P
+query.id:        [ "ProductId" ]
+query.key:       [ "ProductId" ]
+query.columns:   [ "ProductId", "Title", "Status", "List1", "List2", "List3" ]
+query.translate: { "List1" : "ONIX.13", "List2" : "User.User", "List3" : "Invalid.List" }
+

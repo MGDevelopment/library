@@ -44,6 +44,9 @@ setup_sentences = [
         CoerceBool       BOOLEAN NOT NULL,
         CoerceDatetime   TIMESTAMP NOT NULL,
         CoerceFloat      FLOAT NULL,
+        List1            CHAR(2) NOT NULL,
+        List2            CHAR(2) NULL,
+        List3            CHAR(2) NOT NULL,
         PRIMARY KEY (ProductId)
     )
     """,
@@ -64,15 +67,58 @@ setup_sentences = [
         PRIMARY KEY (ProductId, TextRole)
     )
     """,
+    ########### the main list
+    """
+    CREATE TABLE CodeTables (
+        CodeTableId        integer NOT NULL,
+        TableDomain        varchar(128) NOT NULL,
+        TableName          varchar(128) NOT NULL,
+        FlagGrouped        boolean NOT NULL,
+        DataTableName      varchar(128) NOT NULL,
+        DataTableSchema    varchar(128) NULL,
+        DataTableCodeField varchar(128) NULL,
+        DataTableNameField varchar(128) NULL,
+        PRIMARY KEY(CodeTableId)
+    )
+    """,
+    ########### the char 2 table
+    """
+    CREATE TABLE CodeTablesONIX30Char2 (
+        CodeTableId    integer NOT NULL,
+        CodeValue      char(2) NOT NULL,
+        Name           varchar(128) NOT NULL,
+        PRIMARY KEY(CodeTableId, CodeValue)
+    )
+    """,
+    ########### Code Tables Definition
+    "INSERT INTO CodeTables(CodeTableId, TableDomain, TableName, FlagGrouped, DataTableName, "
+                            "DataTableSchema, DataTableCodeField, DataTableNameField) "
+           "VALUES(16, 'ONIX', '13', 1, 'CodeTablesONIX30Char2', NULL, NULL, NULL)",
+    "INSERT INTO CodeTables(CodeTableId, TableDomain, TableName, FlagGrouped, DataTableName, "
+                            "DataTableSchema, DataTableCodeField, DataTableNameField) "
+           "VALUES(3, 'User', 'User', 1, 'CodeTablesONIX30Char2', NULL, NULL, NULL)",
+    ########### Table ONIX.13 DATA
+    "INSERT INTO CodeTablesONIX30Char2(CodeTableId, CodeValue, Name) VALUES(16, '02', 'ISSN')",
+    "INSERT INTO CodeTablesONIX30Char2(CodeTableId, CodeValue, Name) "
+           "VALUES(16, '03', 'German National Bibliography series ID')",
+    "INSERT INTO CodeTablesONIX30Char2(CodeTableId, CodeValue, Name) "
+           "VALUES(16, '04', 'German Books in Print series ID')",
+    "INSERT INTO CodeTablesONIX30Char2(CodeTableId, CodeValue, Name) VALUES(16, '05', 'Electre series ID')",
+    "INSERT INTO CodeTablesONIX30Char2(CodeTableId, CodeValue, Name) VALUES(16, '06', 'DOI')",
+    "INSERT INTO CodeTablesONIX30Char2(CodeTableId, CodeValue, Name) VALUES(16, '22', 'URN')",
+    ########### Table User.User DATA
+    "INSERT INTO CodeTablesONIX30Char2(CodeTableId, CodeValue, Name) VALUES(3, 'A', 'Aprovado')",
+    "INSERT INTO CodeTablesONIX30Char2(CodeTableId, CodeValue, Name) VALUES(3, 'R', 'Rechazado')",
+    "INSERT INTO CodeTablesONIX30Char2(CodeTableId, CodeValue, Name) VALUES(3, 'P', 'Pendiente')",
     ########### Products Data
-    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat) "
-           "VALUES(1, 'Title 1', 'OK', 1,       '2011-12-02T16:34:45.453Z', NULL)",
-    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat) "
-           "VALUES(2, 'Title 2', 'ER', 'false', 'sometime',                 9.15)",
-    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat) "
-           "VALUES(3, 'Title 3', 'OK', 6.65,    93,                         '-9324.10')",
-    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat) "
-           "VALUES(4, 'Title 4', 'ER', 'false', 'sometime',                 'abc')",
+    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat, List1, List2, List3) "
+           "VALUES(1, 'Title 1', 'OK', 1,       '2011-12-02T16:34:45.453Z', NULL,       '02', 'P',  'abc')",
+    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat, List1, List2, List3) "
+           "VALUES(2, 'Title 2', 'ER', 'false', 'sometime',                 9.15,       '01', NULL, 'def')",
+    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat, List1, List2, List3) "
+           "VALUES(3, 'Title 3', 'OK', 6.65,    93,                         '-9324.10', '22', NULL, 'ghi')",
+    "INSERT INTO Products(ProductId, Title, Status, CoerceBool, CoerceDatetime, CoerceFloat, List1, List2, List3) "
+           "VALUES(4, 'Title 4', 'ER', 'false', 'sometime',                 'abc',      '02', 'P',  'jkl')",
     ########### ProductIdentifiers Data
     "INSERT INTO ProductIdentifiers(ProductId, IDValue) VALUES(1, '8050443322')",
     "INSERT INTO ProductIdentifiers(ProductId, IDValue) VALUES(1, '97880504433221')",
@@ -306,6 +352,70 @@ result_code = [
 ]
 
 
+result_translate = [
+    ############# Product 1
+    ( 'PROD', 1, False, {
+        'ProductId': 1,
+        'Status': u'OK',
+        'Title': u'Title 1',
+        'List1': u'02',
+        'List1._desc': u'ISSN',
+        'List1._list': 'ONIX.13',
+        'List2': u'P',
+        'List2._desc': u'Pendiente',
+        'List2._list': 'User.User',
+        'List3': u'abc',
+        'List3._desc': u'abc',
+        'List3._list': 'Invalid.List'
+    } ),
+    ############# Product 2
+    ( 'PROD', 2, False, {
+        'ProductId': 2,
+        'Status': u'ER',
+        'Title': u'Title 2',
+        'List1': u'01',
+        'List1._desc': u'01',
+        'List1._list': 'ONIX.13',
+        'List2': None,
+        'List2._desc': None,
+        'List2._list': 'User.User',
+        'List3': u'def',
+        'List3._desc': u'def',
+        'List3._list': 'Invalid.List'
+    } ),
+    ############# Product 3
+    ( 'PROD', 3, False, {
+        'ProductId': 3,
+        'Status': u'OK',
+        'Title': u'Title 3',
+        'List1': u'22',
+        'List1._desc': u'URN',
+        'List1._list': 'ONIX.13',
+        'List2': None,
+        'List2._desc': None,
+        'List2._list': 'User.User',
+        'List3': u'ghi',
+        'List3._desc': u'ghi',
+        'List3._list': 'Invalid.List'
+    } ),
+    ############# Product 4
+    ( 'PROD', 4, False, {
+        'ProductId': 4,
+        'Status': u'ER',
+        'Title': u'Title 4',
+        'List1': u'02',
+        'List1._desc': u'ISSN',
+        'List1._list': 'ONIX.13',
+        'List2': u'P',
+        'List2._desc': u'Pendiente',
+        'List2._list': 'User.User',
+        'List3': u'jkl',
+        'List3._desc': u'jkl',
+        'List3._list': 'Invalid.List'
+    } )
+]
+
+
 class TestSequenceFunctions(TestCase):
 
     def setUp(self):
@@ -396,4 +506,17 @@ class TestSequenceFunctions(TestCase):
         ]
         result = ecommerce.db.dataset.fetch(entities)
         self.assertEqual(result, result_code, "Dataset returned different data")
+
+
+    def test_list(self):
+        """Test a query with list translation"""
+
+        entities = [
+            ("PROD", 1, "list"),
+            ("PROD", 2, "list"),
+            ("PROD", 3, "list"),
+            ("PROD", 4, "list")
+        ]
+        result = ecommerce.db.dataset.fetch(entities)
+        self.assertEqual(result, result_translate, "Dataset returned different data")
 

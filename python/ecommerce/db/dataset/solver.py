@@ -17,6 +17,7 @@ import types
 
 import ecommerce.config
 import ecommerce.db
+import ecommerce.db.codetables
 
 from exceptions import DBDatasetConfigurationException, DBDatasetRuntimeException
 from coercion import performCoercion
@@ -142,6 +143,9 @@ def solveQuery(dataset, entityType, datasetName, idList):
     # figure out if query is static
     isStatic = dataset.get("query.static", False)
 
+    # get the translate list (if any)
+    translate = dataset.get("query.translate")
+
     # get the group columns list
     group = dataset.get("query.group", [ ])
     group = [ columns.index(key) if key in columns else -1 for key in group ]
@@ -232,6 +236,10 @@ def solveQuery(dataset, entityType, datasetName, idList):
                     if augmentData is None and augment[a]["__all__"] is not None:
                         augmentData = augment[a]["__all__"]
                 row[a] = augmentData
+
+        # if we need to translate code values, do so
+        if translate is not None:
+            row = ecommerce.db.codetables.translate(translate, row)
 
         # add the row to the result
         if format is not None:
