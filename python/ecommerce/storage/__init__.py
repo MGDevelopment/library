@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''S3 Content uploader module for ILHSA SA by Alejo Sanchez
 '''
-from os.path       import join as os_path_join
+from os.path       import exists, join as os_path_join
 from boto          import connect_s3
 from boto.s3.key   import Key
 from gzip          import GzipFile
@@ -20,10 +20,14 @@ class FilesystemStorage(object):
            directory:             destination directory (key prefix)
     '''
     def __init__(self, directory):
-        if directory[0] is '/':
-            self._directory  = directory
-        else:
-            self._directory  = '/' + directory
+        if not isinstance(directory, str) or directory == '':
+            raise IOError('directory path required')
+        if directory[0] is not '/':
+            directory  = '/' + directory # prepend
+        # test if directory is OK
+        if not exists(directory):
+            raise IOError('invalid storage directory')
+        self._directory  = directory
 
     def send(self, name, src, type = None):
         '''Store an object on the filesystem
@@ -47,6 +51,10 @@ class FilesystemStorage(object):
             src_name = '/'.join((self._directory, src_name))
 
         open(dst_name, 'w').write(open(src_name, 'r').read())
+
+    def get(self, name):
+        f = open(self._directory + '/' + name)
+        return f.read()
 
 
 class S3Storage(object):
@@ -123,4 +131,16 @@ class S3Storage(object):
             if src_bucket_name == self._bucket.name:
                 src_name = '/'.join((self._directory, src_name))
         self._bucket.copy_key(dst_name, src_bucket_name, src_name)
+
+    def get(self, name):
+        key = self._bucket.get_key(name)
+        ret = key.get_contents_as_string()
+
+        if key.content_encoding == 'gzip':
+            fbuf = StringIO(ret)  # Temporary in-memory virtual file
+            zf = GzipFile(mode = 'rb', fileobj = fbuf)
+            ret = zf.read()
+            zf.close()
+
+        return ret
 
