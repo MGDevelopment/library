@@ -186,5 +186,5 @@ def initialize(config = None):
 initialize()
 
 # public methods
-__all__ = [ "getConnection", "hasLooseTypes", "dataset" ]
+__all__ = [ "getConnection", "hasLooseTypes", "dataset", "codetables" ]
 
