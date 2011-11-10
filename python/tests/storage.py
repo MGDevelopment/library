@@ -43,12 +43,14 @@ class TestStorageModule(TestCase):
         #f = open(self.tmp_dir + '/' + page_name)
         self.assertEqual(page_data, s.get(page_name))
 
-    def testOpenS3Storage(self):
+    # Disabled S3 test
+    def _testOpenS3Storage(self):
         '''Test opening storage object'''
         s = self.getS3Storage()
         self.assertIsInstance(s, S3Storage)
 
-    def testWriteS3Storage(self):
+    # Disabled S3 test
+    def _testWriteS3Storage(self):
         '''Test opening storage object'''
         s = self.getS3Storage()
         s.send(page_name, page_data, page_type)
