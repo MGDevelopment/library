@@ -32,7 +32,8 @@ query_main:     &query_main
                 I.Name                          AS ImprintName,
                 IEUR.LinkBase                   AS ImprintURLBase,
                 -------------- Ranking????
-                'WHAT IS THIS?'                 AS Ranking,
+                -- WHAT IS THIS???
+                P.ProductId % 4000              AS Ranking,
                 -------------- Publishing Date
                 PSPDD.DateFormat                AS PublishingDateFormat,
                 PSPDD.DateValue                 AS PublishingDateValue,
@@ -113,7 +114,7 @@ query_main:     &query_main
     query.id:       [ "ProductId" ]
     query.key:      [ "ProductId" ]
     query.output:   list
-    query.columns:  [ "ProductId", "Title", "LinkBase", "CoverSmall", "Rating", "CommentCount", 
+    query.columns:  [ "ProductId", "Title", "LinkBase", "CoverSmall", "Rating", "CommentCount",
                       "ImprintId", "ImprintName", "ImprintURLBase", "Ranking",
                       "PublishingDateFormat", "PublishingDateValue", "LanguageCode",
                       "ExtentType", "ExtentUnit", "ExtentValue", "ProductForm",

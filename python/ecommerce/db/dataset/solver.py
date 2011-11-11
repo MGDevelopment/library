@@ -229,11 +229,11 @@ def solveQuery(dataset, entityType, datasetName, idList):
                 augmentData = None
                 if grouping:
                     augmentData = augment[a][gKey] if gKey in augment[a] else None
-                    if augmentData is None and augment[a]["__all__"] is not None:
+                    if augmentData is None and augment[a].get("__all__") is not None:
                         augmentData = augment[a]["__all__"]
                 if keying:
                     augmentData = augment[a][kKey] if kKey in augment[a] else None
-                    if augmentData is None and augment[a]["__all__"] is not None:
+                    if augmentData is None and augment[a].get("__all__") is not None:
                         augmentData = augment[a]["__all__"]
                 row[a] = augmentData
 
