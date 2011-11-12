@@ -9,6 +9,7 @@ config = {
     'packages':    ['ecommerce',
                     'ecommerce.config',
                     'ecommerce.db',
+                    'ecommerce.storage',
                     'ecommerce.content'],
     'requires':    ['yaml', 'jinja2', 'psycopg', 'boto'],
     'scripts':     [],

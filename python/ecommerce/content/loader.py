@@ -39,7 +39,9 @@ class DBLoader(BaseLoader):
             tmpls = self.conn.execute(self.sql_list)
         except:
             # XXX
+            pass
 
 
 class RenderPage(object):
     '''Renders a specific page'''
+    pass
