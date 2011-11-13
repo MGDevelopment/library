@@ -331,7 +331,7 @@ def solveQuerySQL(dataset, entityType, datasetName, idList):
                 value = ""
 
         # do the replacement
-        sql = sql.replace( (macroBegin + name + macroEnd), value)
+        sql = sql.replace( (macroBegin + name + macroEnd), str(value))
 
         # find the next
         start = sql.find(macroBegin)
