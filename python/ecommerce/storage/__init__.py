@@ -29,12 +29,12 @@ class FilesystemStorage(object):
             raise IOError('invalid storage directory')
         self._directory  = directory
 
-    def send(self, name, src, type = None):
+    def send(self, name, src, headers = None):
         '''Store an object on the filesystem
            params
-           name:   name for the destination object
-           src:    generator of object data
-           type:   Content-Type (ignored)'''
+           name:    name for the destination object
+           src:     generator of object data
+           headers: (ignored)'''
 
         f = open(os_path_join(self._directory, name), 'w')
         f.write(src)
@@ -83,12 +83,12 @@ class S3Storage(object):
                 directory = directory[:-1] # Remove trailing slash for S3
         self._directory  = directory
 
-    def send(self, name, src, type):
+    def send(self, name, src, headers):
         '''Upload an object to S3
            params
-           name:   name for the destination object
-           src:    generator of object data
-           type:   Content-Type'''
+           name:    name for the destination object
+           src:     generator of object data
+           headers: Content-Type, Content-Encoding, Cache-Control'''
 
         # Create key
         key     = Key(self._bucket)
@@ -98,18 +98,17 @@ class S3Storage(object):
             key.key = name
 
         # Headers
-        key.set_metadata('Content-Type', type)
-        if self._cache_type:
-            key.set_metadata('Cache-Control', self._cache_type)
+        for header_name, header_value in headers.items():
+            key.set_metadata(header_name, header_value)
+
         # Note: S3 already sets Etag
 
         fbuf = StringIO()  # Temporary in-memory virtual file
-        if self._gzip and type in content_gzippable:
+        if headers['Content-Encoding'] == 'gzip' and self._gzip:
             # Compressed
             zf = GzipFile(name, 'wb', 9, fbuf)
             zf.write(src)
             zf.close()
-            key.set_metadata('Content-Encoding', 'gzip')
         else:
             # Plain
             fbuf.write(src)
