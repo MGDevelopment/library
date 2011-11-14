@@ -104,7 +104,7 @@ class S3Storage(object):
         # Note: S3 already sets Etag
 
         fbuf = StringIO()  # Temporary in-memory virtual file
-        if headers['Content-Encoding'] == 'gzip' and self._gzip:
+        if headers.get('Content-Encoding', None) == 'gzip' and self._gzip:
             # Compressed
             zf = GzipFile(name, 'wb', 9, fbuf)
             zf.write(src)
