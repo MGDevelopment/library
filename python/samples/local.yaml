@@ -44,6 +44,8 @@ constants:
                 idtype:      118
                 idvalue:     com.ilhsa.category.3
                 subjectid:   570
+        classics:
+            days:            730     # 2 years old and still top selling => it's a classic
 
 #
 # content generation

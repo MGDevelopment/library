@@ -121,11 +121,16 @@ def solveQuery(dataset, entityType, datasetName, idList):
     """
 
     # if we have augment, solve them
-    augmenting = False
-    augment = { }
-    if dataset.get("query.augment") is not None:
+    augmenting  = False
+    augment     = { }
+    augmentKeys = { }
+    if "query.augment" in dataset:
         augmenting = True
         augment = solveAugment(dataset, entityType, datasetName, idList, "query.augment")
+
+        # get the augment keys (if present)
+        augments = dataset["query.augment"]
+        augmentKeys = { a : augments[a]["join.key"] for a in augments if "join.key" in augments[a] }
 
     # build the query
     query = solveQuerySQL(dataset, entityType, datasetName, idList)
@@ -227,11 +232,25 @@ def solveQuery(dataset, entityType, datasetName, idList):
             # add each attribute
             for a in augment:
                 augmentData = None
-                if grouping:
+
+                # try to get the data (by special field)
+                if a in augmentKeys:
+                    # figure out the key
+                    jKeys   = augmentKeys[a]
+                    joinSingle = True if len(jKeys) == 1 else False
+                    jKey = row[jKeys[0]] if joinSingle else tuple( [ row[jKeys[i]] for i in range(len(jKeys)) ] )
+
+                    # try to get it
+                    augmentData = augment[a].get(jKey)
+
+                # try to get the data (by grouping)
+                if augmentData is None and grouping:
                     augmentData = augment[a][gKey] if gKey in augment[a] else None
                     if augmentData is None and augment[a].get("__all__") is not None:
                         augmentData = augment[a]["__all__"]
-                if keying:
+
+                # try to get the data (by key)
+                if augmentData is None and keying:
                     augmentData = augment[a][kKey] if kKey in augment[a] else None
                     if augmentData is None and augment[a].get("__all__") is not None:
                         augmentData = augment[a]["__all__"]
