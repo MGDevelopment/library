@@ -9,7 +9,11 @@ from os.path            import join as os_path_join
 bucket_name = 'tmk-a'
 page_name   = 'test_page.html'
 page_data   = '<html><body>Test content</body></html>'
-page_type   = 'text/html'
+headers  = {
+    'Content-Type':    'text/html',
+    'Content-Encoding': 'gzip',
+    'Cache-Control': 'max-age=3600, must-revalidate'
+}
 
 class TestStorageModule(TestCase):
 
@@ -39,7 +43,7 @@ class TestStorageModule(TestCase):
     def testWriteFilesystemStorage(self):
         '''Test opening storage object'''
         s = self.getFilesystemStorage()
-        s.send(page_name, page_data, page_type)
+        s.send(page_name, page_data, headers)
         #f = open(self.tmp_dir + '/' + page_name)
         self.assertEqual(page_data, s.get(page_name))
 
@@ -53,6 +57,6 @@ class TestStorageModule(TestCase):
     def _testWriteS3Storage(self):
         '''Test opening storage object'''
         s = self.getS3Storage()
-        s.send(page_name, page_data, page_type)
+        s.send(page_name, page_data, headers)
         self.assertEqual(page_data, s.get(page_name))
 
