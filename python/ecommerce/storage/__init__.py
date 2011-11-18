@@ -2,6 +2,7 @@
 '''S3 Content uploader module for ILHSA SA by Alejo Sanchez
 '''
 from os.path       import exists, join as os_path_join
+from os            import sep as os_sep
 from boto          import connect_s3
 from boto.s3.key   import Key
 from gzip          import GzipFile
@@ -22,11 +23,11 @@ class FilesystemStorage(object):
     def __init__(self, directory):
         if not isinstance(directory, str) or directory == '':
             raise IOError('directory path required')
-        if directory[0] is not '/':
+        if directory[0] not in ('/', '.'):
             directory  = '/' + directory # prepend
         # test if directory is OK
         if not exists(directory):
-            raise IOError('invalid storage directory')
+            raise IOError('invalid storage directory "' + directory + '"')
         self._directory  = directory
 
     def send(self, name, src, headers = None):
@@ -36,6 +37,8 @@ class FilesystemStorage(object):
            src:     generator of object data
            headers: (ignored)'''
 
+        if name[0] == os_sep:
+            name = name[1:] # Strip leading slash
         f = open(os_path_join(self._directory, name), 'w')
         f.write(src)
 
