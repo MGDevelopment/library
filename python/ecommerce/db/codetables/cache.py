@@ -18,12 +18,15 @@ import ecommerce.db
 from exceptions import DBCodetablesConfigurationException, DBCodetablesRuntimeException
 
 # the cache
-_cache  = { }
+_cache  = None
 _config = { }
 
 
 def codeTableList():
     """List all the cached code tables"""
+
+    # be sure cache is initialized
+    _initializeCache()
 
     return _cache.keys()
 
@@ -82,6 +85,9 @@ def codeTableFind(table, language = None):
     """Find the entry for a code table"""
 
     global _cache
+
+    # be sure cache is initialized
+    _initializeCache()
 
     # sanity checks
     if table is None:
@@ -243,6 +249,16 @@ def _loadCache(_config):
     return _cache
 
 
+def _initializeCache():
+    """If not already done, try loading the list of tables"""
+
+    global _cache
+
+    # try loading if not defined
+    if _cache is None:
+        _cache = _loadCache(_config)
+
+
 def load(config):
     """Load the list of code tables"""
 
@@ -250,7 +266,7 @@ def load(config):
     _config = _loadConfig(config)
 
     # try initializing the cache
-    _cache  = _loadCache(_config)
+    _cache  = None
 
     return (_config, _cache)
 
