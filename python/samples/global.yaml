@@ -24,6 +24,7 @@ global_db:          &global_db
     python:         &global_db_python       # base definition of python modules params
         # params each module requires in connect
         psycopg2:   [ "database", "host", "port", "user", "password", "sslmode" ] 
+        pyodbc:     [ "DSN", "password" ] 
         sqlite3:    [ "database" ] 
     eCommerce:      &global_db_eCommerce    # base definition of eCommerce db
         engine:     postgresql              # db engine

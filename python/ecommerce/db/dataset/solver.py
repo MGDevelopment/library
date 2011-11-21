@@ -26,6 +26,9 @@ from coercion import performCoercion
 # default database
 _defaultDB = None
 
+# imported post processing code libraries
+_postCode = { }
+
 # imported code libraries
 _code = { }
 
@@ -131,6 +134,15 @@ def solveQuery(dataset, entityType, datasetName, idList):
         # get the augment keys (if present)
         augments = dataset["query.augment"]
         augmentKeys = { a : augments[a]["join.key"] for a in augments if "join.key" in augments[a] }
+
+    # get the post process methods (if any)
+    post = dataset.get("query.post")
+    if post is not None:
+        # if a string => make it a list
+        if isinstance(post, types.StringTypes):
+            post = [ post ]
+        # be sure it's a list
+        post = list(post)
 
     # build the query
     query = solveQuerySQL(dataset, entityType, datasetName, idList)
@@ -260,6 +272,13 @@ def solveQuery(dataset, entityType, datasetName, idList):
         if translate is not None:
             row = ecommerce.db.codetables.translate(translate, row)
 
+        # execute the post methods (if any)
+        if post is not None:
+            # iterate on the functions
+            for i in range(len(post)):
+                # process function i
+                row = postProcess(post[i], row)
+
         # add the row to the result
         if format is not None:
             result.append(row)
@@ -356,6 +375,57 @@ def solveQuerySQL(dataset, entityType, datasetName, idList):
         start = sql.find(macroBegin)
 
     return sql
+
+
+def postProcess(fcnName, row):
+    """Execute all the named functions on the row"""
+
+    global _postCode
+
+    # get the code entry
+    parts = fcnName.rsplit(".", 1)
+    if len(parts) != 2:
+        raise DBDatasetRuntimeException(
+              "Invalid qualified function name [%s]" % fcnName)
+
+    # get the parts
+    (module, function) = (parts[0], parts[1])
+
+    # if module is not in the cache, import it
+    if module not in _postCode:
+
+        # initialize the cache entry
+        _postCode[module] = { "module" : None, "functions" : { } }
+
+        # try the import (ignore exceptions)
+        try:
+            _postCode[module]["module"] = importlib.import_module(module)
+        except:
+            pass
+    if _postCode[module]["module"] is None:
+        raise DBDatasetRuntimeException(
+              "Module [%s] cannot be imported" % module)
+
+    # if function not in cache, get it
+    if function not in _postCode[module]["functions"]:
+
+        # initialize the entry
+        _postCode[module]["functions"][function] = None
+
+        # try to get the object (ignore exceptions)
+        try:
+            _postCode[module]["functions"][function] = getattr(_postCode[module]["module"], function)
+        except:
+            pass
+    if _postCode[module]["functions"][function] is None:
+        raise DBDatasetRuntimeException(
+              "Module [%s] does not have a function [%s]" % (module, function))
+
+    # now, invoke the function on the row
+    result = _postCode[module]["functions"][function](row)
+
+    # return the result
+    return result
 
 
 def solveCode(dataset, entityType, datasetName, idList):

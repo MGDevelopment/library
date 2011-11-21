@@ -315,6 +315,7 @@ result_code = [
         'ProductId': 1,
         'Status': u'OK',
         'Title': u'Title 1',
+        'RTitle': u'1 eltiT',
         'TotalCount': {
             'Max': 4, 'Min': 1, 'Total': 4
         }
@@ -325,6 +326,7 @@ result_code = [
         'ProductId': 2,
         'Status': u'ER',
         'Title': u'Title 2',
+        'RTitle': u'2 eltiT',
         'TotalCount': {
             'Max': 4, 'Min': 1, 'Total': 4
         }
@@ -335,6 +337,7 @@ result_code = [
         'ProductId': 3,
         'Status': u'OK',
         'Title': u'Title 3',
+        'RTitle': u'3 eltiT',
         'TotalCount': {
             'Max': 4, 'Min': 1, 'Total': 4
         }
@@ -345,6 +348,7 @@ result_code = [
         'ProductId': 4,
         'Status': u'ER',
         'Title': u'Title 4',
+        'RTitle': u'4 eltiT',
         'TotalCount': {
             'Max': 4, 'Min': 1, 'Total': 4
         }
