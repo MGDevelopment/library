@@ -32,9 +32,11 @@ class DBException(Exception):
     """Generic ecommerce.db exception"""
     pass
 
+
 class DBConfigurationException(DBException):
     """ecommerce.db Configuration Exception"""
     pass
+
 
 class DBRuntimeException(DBException):
     """ecommerce.db Runtime Exception
@@ -43,6 +45,7 @@ class DBRuntimeException(DBException):
     the module or connect function for that db cannot be imported.
     """
     pass
+
 
 def hasLooseTypes(dbname = None):
     """Indicates if the named database has loose (SQLite3) or strict (Postgres) types."""
@@ -58,6 +61,22 @@ def hasLooseTypes(dbname = None):
 
     # get the loosetypes attribute (default to False)
     return dbDef["def"].get("loosetypes", False)
+
+
+def hasEncoding(dbname = None):
+    """Indicates if the named database has an encoding other than UTF-8"""
+
+    # use default db if none passed
+    if dbname is None:
+        dbname = _defaultDB
+
+    # get the db definition
+    if dbname not in _databases:
+        raise DBRuntimeException("Unknown database [%s]" % dbname)
+    dbDef = _databases[dbname]
+
+    # get the loosetypes attribute (default to False)
+    return dbDef["def"].get("encoding")
 
 
 def getConnection(dbname = None):
