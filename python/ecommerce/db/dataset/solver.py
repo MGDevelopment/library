@@ -116,6 +116,21 @@ def solveAugment(dataset, entityType, datasetName, idList, attributeName = "augm
     return result
 
 
+def decode(value, encoding = None):
+    """If a string type and there's an encoding other than UTF-8, convert"""
+
+    # need enconding and a string type
+    if encoding is None:
+        return value
+
+    # only for strings (non-unicode)
+    if isinstance(value, types.StringType):
+        if encoding != "UTF-8" and encoding != "utf-8":
+            return value.decode(encoding).encode('utf8')
+
+    return value
+
+
 def solveQuery(dataset, entityType, datasetName, idList):
     """Solve the query, possibly doing a manual join of augments
 
@@ -199,10 +214,11 @@ def solveQuery(dataset, entityType, datasetName, idList):
         keySingle = True if len(keys) == 1 else False
         keying = True if len(keys) > 0 else False
 
-    # get the db name and loose type mark
-    dbname = dataset.get("database")
-    loose  = ecommerce.db.hasLooseTypes(dbname)
-    coerce = None if not loose else dataset.get("query.coerce")
+    # get the db name, encoding (if any) and loose type mark
+    dbname    = dataset.get("database")
+    loose     = ecommerce.db.hasLooseTypes(dbname)
+    encoding  = ecommerce.db.hasEncoding(dbname)
+    coerce    = None if not loose else dataset.get("query.coerce")
 
     # get a db connection
     conn   = ecommerce.db.getConnection(dbname)
@@ -224,7 +240,7 @@ def solveQuery(dataset, entityType, datasetName, idList):
     while tRow is not None:
 
         # build the row dictionary
-        row = { columns[i] : tRow[i] for i in range(len(columns)) }
+        row = { columns[i] : decode(tRow[i], encoding) for i in range(len(columns)) }
 
         # if loose types and have something to coerce, do so
         if loose and (coerce is not None):
