@@ -8,6 +8,7 @@ query.prefix:   P
 query.id:       [ "ProductId" ]
 query.key:      [ "ProductId" ]
 query.columns:  [ "ProductId", "Title", "Status" ]
+query.post:     [ "tests.db_dataset_code.title_reverse" ]
 query.augment:
     TotalCount:
         query.sql:      >

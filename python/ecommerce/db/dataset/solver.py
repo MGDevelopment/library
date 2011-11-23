@@ -26,6 +26,9 @@ from coercion import performCoercion
 # default database
 _defaultDB = None
 
+# imported post processing code libraries
+_postCode = { }
+
 # imported code libraries
 _code = { }
 
@@ -113,6 +116,21 @@ def solveAugment(dataset, entityType, datasetName, idList, attributeName = "augm
     return result
 
 
+def decode(value, encoding = None):
+    """If a string type and there's an encoding other than UTF-8, convert"""
+
+    # need enconding and a string type
+    if encoding is None:
+        return value
+
+    # only for strings (non-unicode)
+    if isinstance(value, types.StringType):
+        if encoding != "UTF-8" and encoding != "utf-8":
+            return value.decode(encoding).encode('utf8')
+
+    return value
+
+
 def solveQuery(dataset, entityType, datasetName, idList):
     """Solve the query, possibly doing a manual join of augments
 
@@ -121,11 +139,25 @@ def solveQuery(dataset, entityType, datasetName, idList):
     """
 
     # if we have augment, solve them
-    augmenting = False
-    augment = { }
-    if dataset.get("query.augment") is not None:
+    augmenting  = False
+    augment     = { }
+    augmentKeys = { }
+    if "query.augment" in dataset:
         augmenting = True
         augment = solveAugment(dataset, entityType, datasetName, idList, "query.augment")
+
+        # get the augment keys (if present)
+        augments = dataset["query.augment"]
+        augmentKeys = { a : augments[a]["join.key"] for a in augments if "join.key" in augments[a] }
+
+    # get the post process methods (if any)
+    post = dataset.get("query.post")
+    if post is not None:
+        # if a string => make it a list
+        if isinstance(post, types.StringTypes):
+            post = [ post ]
+        # be sure it's a list
+        post = list(post)
 
     # build the query
     query = solveQuerySQL(dataset, entityType, datasetName, idList)
@@ -182,10 +214,11 @@ def solveQuery(dataset, entityType, datasetName, idList):
         keySingle = True if len(keys) == 1 else False
         keying = True if len(keys) > 0 else False
 
-    # get the db name and loose type mark
-    dbname = dataset.get("database")
-    loose  = ecommerce.db.hasLooseTypes(dbname)
-    coerce = None if not loose else dataset.get("query.coerce")
+    # get the db name, encoding (if any) and loose type mark
+    dbname    = dataset.get("database")
+    loose     = ecommerce.db.hasLooseTypes(dbname)
+    encoding  = ecommerce.db.hasEncoding(dbname)
+    coerce    = None if not loose else dataset.get("query.coerce")
 
     # get a db connection
     conn   = ecommerce.db.getConnection(dbname)
@@ -207,7 +240,7 @@ def solveQuery(dataset, entityType, datasetName, idList):
     while tRow is not None:
 
         # build the row dictionary
-        row = { columns[i] : tRow[i] for i in range(len(columns)) }
+        row = { columns[i] : decode(tRow[i], encoding) for i in range(len(columns)) }
 
         # if loose types and have something to coerce, do so
         if loose and (coerce is not None):
@@ -227,11 +260,25 @@ def solveQuery(dataset, entityType, datasetName, idList):
             # add each attribute
             for a in augment:
                 augmentData = None
-                if grouping:
+
+                # try to get the data (by special field)
+                if a in augmentKeys:
+                    # figure out the key
+                    jKeys   = augmentKeys[a]
+                    joinSingle = True if len(jKeys) == 1 else False
+                    jKey = row[jKeys[0]] if joinSingle else tuple( [ row[jKeys[i]] for i in range(len(jKeys)) ] )
+
+                    # try to get it
+                    augmentData = augment[a].get(jKey)
+
+                # try to get the data (by grouping)
+                if augmentData is None and grouping:
                     augmentData = augment[a][gKey] if gKey in augment[a] else None
                     if augmentData is None and augment[a].get("__all__") is not None:
                         augmentData = augment[a]["__all__"]
-                if keying:
+
+                # try to get the data (by key)
+                if augmentData is None and keying:
                     augmentData = augment[a][kKey] if kKey in augment[a] else None
                     if augmentData is None and augment[a].get("__all__") is not None:
                         augmentData = augment[a]["__all__"]
@@ -240,6 +287,13 @@ def solveQuery(dataset, entityType, datasetName, idList):
         # if we need to translate code values, do so
         if translate is not None:
             row = ecommerce.db.codetables.translate(translate, row)
+
+        # execute the post methods (if any)
+        if post is not None:
+            # iterate on the functions
+            for i in range(len(post)):
+                # process function i
+                row = postProcess(post[i], row)
 
         # add the row to the result
         if format is not None:
@@ -331,12 +385,63 @@ def solveQuerySQL(dataset, entityType, datasetName, idList):
                 value = ""
 
         # do the replacement
-        sql = sql.replace( (macroBegin + name + macroEnd), value)
+        sql = sql.replace( (macroBegin + name + macroEnd), str(value))
 
         # find the next
         start = sql.find(macroBegin)
 
     return sql
+
+
+def postProcess(fcnName, row):
+    """Execute all the named functions on the row"""
+
+    global _postCode
+
+    # get the code entry
+    parts = fcnName.rsplit(".", 1)
+    if len(parts) != 2:
+        raise DBDatasetRuntimeException(
+              "Invalid qualified function name [%s]" % fcnName)
+
+    # get the parts
+    (module, function) = (parts[0], parts[1])
+
+    # if module is not in the cache, import it
+    if module not in _postCode:
+
+        # initialize the cache entry
+        _postCode[module] = { "module" : None, "functions" : { } }
+
+        # try the import (ignore exceptions)
+        try:
+            _postCode[module]["module"] = importlib.import_module(module)
+        except:
+            pass
+    if _postCode[module]["module"] is None:
+        raise DBDatasetRuntimeException(
+              "Module [%s] cannot be imported" % module)
+
+    # if function not in cache, get it
+    if function not in _postCode[module]["functions"]:
+
+        # initialize the entry
+        _postCode[module]["functions"][function] = None
+
+        # try to get the object (ignore exceptions)
+        try:
+            _postCode[module]["functions"][function] = getattr(_postCode[module]["module"], function)
+        except:
+            pass
+    if _postCode[module]["functions"][function] is None:
+        raise DBDatasetRuntimeException(
+              "Module [%s] does not have a function [%s]" % (module, function))
+
+    # now, invoke the function on the row
+    result = _postCode[module]["functions"][function](row)
+
+    # return the result
+    return result
 
 
 def solveCode(dataset, entityType, datasetName, idList):
