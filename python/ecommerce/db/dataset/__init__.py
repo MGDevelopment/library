@@ -42,6 +42,8 @@ def setPreProcess(preProcess = None):
     accomodate differences in the database model.
     """
 
+    global _preProcess
+
     # get the current
     current = _preProcess
 
