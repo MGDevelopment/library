@@ -25,6 +25,33 @@ from exceptions import DBDatasetConfigurationException, DBDatasetRuntimeExceptio
 from loader     import getLoader, loaderInitialize
 from solver     import solve, solverInitialize
 
+# the pre-process function
+_preProcess = None
+
+
+def setPreProcess(preProcess = None):
+    """Sets the fetch list pre-process funcion
+
+    This function receives the same parameters than the fetch function and
+    can alter the entities. This is useful if some entity type can actually
+    built represent many types of database entities that require different
+    datasets. This function could change the dataset name according to some
+    rules. For example, if <SUBJ, 1> is a category and <SUBJ, 2> is a
+    subcategory, when the dataset subjectComments is passed in, it could be
+    changed to subjectCommentsCategory and subjectCommentsSubcategory to
+    accomodate differences in the database model.
+    """
+
+    # get the current
+    current = _preProcess
+
+    # set the new
+    _preProcess = preProcess
+
+    # always return the old pre-process function
+    return current
+
+
 def fetch(entities, application = None):
     """Returns datasets for each entity (EntityType, EntityId, DatasetName) passed
 
@@ -37,6 +64,12 @@ def fetch(entities, application = None):
     Arguments:
     entities -- a list of 3-uples, each being < EntityType, EntityId, DatasetName >
     """
+
+    #
+    # give a chance to pre-process the fetch list and change it
+    #
+    if _preProcess is not None:
+        entities = _preProcess(entities, application)
 
     #
     # a first pass thru the list is made to:
@@ -143,11 +176,12 @@ def initialize(config = None):
     # initialize the solver
     solverInitialize(config)
 
+
 # initialize
 initialize()
 
 # public methods
-__all__ = [ "fetch", "initialize", "configApplication" ]
+__all__ = [ "fetch", "initialize", "configApplication", "setPreProcess" ]
 
 if __name__ == "__main__":
     print "Exports: ", __all__
