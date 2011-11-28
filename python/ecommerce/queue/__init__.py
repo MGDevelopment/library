@@ -51,11 +51,17 @@ by Jose Luis Campanello
 """
 
 from qexceptions import *
-import queue_folder
+from queue_folder import *
+from queue_folder import QueueFolderLockException
 
 _queueTypes = {
     "folder" : queue_folder.create
 }
+
+#QueueException              = qexceptions.QueueException
+#QueueConfigurationException = qexceptions.QueueConfigurationException
+#QueueRuntimeException       = qexceptions.QueueRuntimeException
+#QueueFolderLockException    = queue_folder.QueueFolderLockException
 
 
 def queue(config, prefix, producer = True):
@@ -81,4 +87,8 @@ def queue(config, prefix, producer = True):
 
     # return a new queue object
     return creator(config, prefix, producer)
+
+
+__all__ = [ "queue", "QueueException", "QueueConfigurationException", "QueueRuntimeException",
+            "QueueFolderLockException" ]
 

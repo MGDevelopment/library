@@ -115,6 +115,7 @@ class QueueFolder(Queue):
             pidfile = self._folder + os.sep + self._pid
 
             # try locking
+            self._lockFile = None
             try:
                 self._lockFile = zc.lockfile.LockFile(pidfile)
             except zc.lockfile.LockError:
