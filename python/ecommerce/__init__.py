@@ -3,4 +3,4 @@ by Alejo Sanchez, Jose Luis Campanello and Mariano Goldsman
 """
 
 # Exported names
-__all__ = [ "config", 'db', 'content' ]
+__all__ = [ "config", 'db', 'content', "queue" ]
