@@ -51,8 +51,11 @@ by Jose Luis Campanello
 """
 
 from qexceptions import *
+import queue_folder
 
-_queueTypes = { }
+_queueTypes = {
+    "folder" : queue_folder.create
+}
 
 
 def queue(config, prefix, producer = True):
@@ -71,19 +74,10 @@ def queue(config, prefix, producer = True):
 
     # get the module (or import, if necessary)
     if type not in _queueTypes:
-        try:
-            _queueTypes[type] = __import__("queue_" + type)
-        except:
-            pass
-    if type not in _queueTypes:
         raise QueueRuntimeException("Unknown queue type [%s]" % type)
 
     # get the module and the create function
-    module  = _queueTypes[type]
-    try:
-        creator = getattr(module, "create", None)
-    except:
-        raise QueueRuntimeException("Module for Queue type [%s] has no 'create' function" % type)
+    creator  = _queueTypes[type]
 
     # return a new queue object
     return creator(config, prefix, producer)
