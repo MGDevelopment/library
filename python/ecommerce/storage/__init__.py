@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 '''S3 Content uploader module for ILHSA SA by Alejo Sanchez
 '''
-from os.path       import exists, join as os_path_join
-from os            import sep as os_sep
+from os.path       import dirname, exists, join as os_path_join
+from os            import makedirs, sep as os_sep
 from boto          import connect_s3
 from boto.s3.key   import Key
 from gzip          import GzipFile
@@ -39,8 +39,13 @@ class FilesystemStorage(object):
 
         if name[0] == os_sep:
             name = name[1:] # Strip leading slash
-        f = open(os_path_join(self._directory, name), 'w')
+        tname = os_path_join(self._directory, name)
+        tdir = dirname(tname)
+        if not exists(tdir):
+            makedirs(tdir)
+        f = open(tname, 'w')
         f.write(src)
+        f.close()
 
     def copy(self, dst_name, src_name):
         '''Copy S3 object to this storage
