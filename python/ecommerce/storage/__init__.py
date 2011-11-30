@@ -66,6 +66,7 @@ class FilesystemStorage(BaseStorage):
         if  not isinstance(directory, types.StringTypes) or \
             directory == '' or directory is None:
             raise IOError('directory path required')
+
         # JLUIS - if path is relative, let it be relative
         #if directory[0] is not '/':
         #    directory  = '/' + directory # prepend
@@ -85,9 +86,9 @@ class FilesystemStorage(BaseStorage):
                 headers: (ignored)
         '''
 
-        if name[0] == sep:
-            name = name[1:] # Strip leading slash
-        tname = os_path_join(self._directory, name)
+        if name[0] == self.sep:
+            name = name[len(self.sep):] # Strip leading slash
+        tname = self._directory + self.sep + name
         tdir = dirname(tname)
         if not exists(tdir):
             makedirs(tdir)
@@ -108,7 +109,8 @@ class FilesystemStorage(BaseStorage):
         dst_name = self._directory + self.sep + dst_name
         src_name = self._directory + self.sep + src_name
 
-        open(dst_name, 'w').write(open(src_name, 'r').read())
+        f = open(dst_name, 'w').write(open(src_name, 'r').read())
+        f.close()
 
 
     def get(self, name):
