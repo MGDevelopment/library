@@ -22,8 +22,6 @@ def fetch(entityType, entityIds):
     NOTE: entityIds is a dictionary where keys are entity ids
     """
 
-    print "cannonical.fetch. entity [%s], ids %s" % (entityType, entityIds)
-
     # call the appropriate function
     if entityType == "SUBJ":
         return fetchSUBJ(entityType, entityIds)
@@ -172,8 +170,6 @@ def fetchPAGE(entityType, entityIds):
     
     NOTE: returning empty for all pages
     """
-
-    print "fetchPAGE"
 
     # return empty for anything we don't know
     return { id : { } for id in entityIds }

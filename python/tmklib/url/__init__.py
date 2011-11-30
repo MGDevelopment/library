@@ -3,8 +3,6 @@
 by Jose Luis Campanello
 """
 
-import pprint
-import sys
 import urllib
 
 import tmklib.support
@@ -306,16 +304,10 @@ def cannonicals(entities):
             partials[EntityType] = { }
         partials[EntityType][EntityId] = None
 
-    print "about to cannonical.fetch"
-
-    pprint.pprint(partials, sys.stdout, 4)
-
     # fetch data (from DB) for each type
     for p in partials:
         if len(partials[p]) > 0:
             partials[p] = cannonical.fetch(p, partials[p])
-
-    print "did to cannonical.fetch"
 
     # generate all URLs
     for p in partials:
@@ -326,8 +318,6 @@ def cannonicals(entities):
             partials[p] = urls
         else:
             partials[p] = { id : None for id in partials[p] }
-
-    print "did generate the list"
 
     # build and return the result
     return [ partials[entities[i][0]][entities[i][1]] for i in range(len(entities)) ]
