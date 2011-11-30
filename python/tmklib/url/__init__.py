@@ -3,6 +3,8 @@
 by Jose Luis Campanello
 """
 
+import pprint
+import sys
 import urllib
 
 import tmklib.support
@@ -250,6 +252,22 @@ def CONT(row, rowBack = True):
 
 ########################################################
 #
+# PAGEs - home page
+#
+
+def PAGE(row, rowBack = True):
+    """Creates the URL for the Home page"""
+
+    linkBase = "/"
+
+    # set the URL
+    row["LinkBase"] = linkBase
+
+    return row if rowBack else linkBase
+
+
+########################################################
+#
 # cannonicals
 #
 
@@ -271,13 +289,15 @@ def cannonicals(entities):
         "SUBJ" : SUBJ,
         "PROD" : PROD,
         "IMPR" : IMPR,
-        "CONT" : CONT
+        "CONT" : CONT,
+        "PAGE" : PAGE
     }
     partials = {
         "SUBJ" : { },
         "PROD" : { },
         "IMPR" : { },
-        "CONT" : { }
+        "CONT" : { },
+        "PAGE" : { }
     }
     for e in range(len(entities)):
         EntityType, EntityId = entities[e][0], entities[e][1]
@@ -286,9 +306,16 @@ def cannonicals(entities):
             partials[EntityType] = { }
         partials[EntityType][EntityId] = None
 
+    print "about to cannonical.fetch"
+
+    pprint.pprint(partials, sys.stdout, 4)
+
     # fetch data (from DB) for each type
     for p in partials:
-        partials[p] = cannonical.fetch(p, partials[p])
+        if len(partials[p]) > 0:
+            partials[p] = cannonical.fetch(p, partials[p])
+
+    print "did to cannonical.fetch"
 
     # generate all URLs
     for p in partials:
@@ -300,9 +327,11 @@ def cannonicals(entities):
         else:
             partials[p] = { id : None for id in partials[p] }
 
+    print "did generate the list"
+
     # build and return the result
     return [ partials[entities[i][0]][entities[i][1]] for i in range(len(entities)) ]
 
 ########################################################
 
-__all__ = [ "SUBJ", "PROD", "CONT", "IMPR", "cannonicals" ]
+__all__ = [ "SUBJ", "PROD", "CONT", "IMPR", "PAGE", "cannonicals" ]

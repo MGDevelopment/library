@@ -3,4 +3,4 @@
 by Jose Luis Campanello
 """
 
-__all__ = [ "CONT", "IMPR", "PROD", "SUBJ" ]
+__all__ = [ "CONT", "IMPR", "PAGE", "PROD", "SUBJ" ]

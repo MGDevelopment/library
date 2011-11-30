@@ -12,6 +12,7 @@ import tmklib.fixes.PROD
 import tmklib.fixes.SUBJ
 import tmklib.fixes.CONT
 import tmklib.fixes.IMPR
+import tmklib.fixes.PAGE
 
 ########################################################
 
@@ -20,6 +21,8 @@ def fetch(entityType, entityIds):
     
     NOTE: entityIds is a dictionary where keys are entity ids
     """
+
+    print "cannonical.fetch. entity [%s], ids %s" % (entityType, entityIds)
 
     # call the appropriate function
     if entityType == "SUBJ":
@@ -30,6 +33,8 @@ def fetch(entityType, entityIds):
         return fetchIMPR(entityType, entityIds)
     elif entityType == "CONT":
         return fetchCONT(entityType, entityIds)
+    elif entityType == "PAGE":
+        return fetchPAGE(entityType, entityIds)
 
     # return empty for anything we don't know
     return { id : { } for id in entityIds }
@@ -155,6 +160,20 @@ def fetchCONT(entityType, entityIds):
     
     NOTE: not returning data because it requires Categoria_Seccion
     """
+
+    # return empty for anything we don't know
+    return { id : { } for id in entityIds }
+
+
+########################################################
+
+def fetchPAGE(entityType, entityIds):
+    """Fetch data for PAGE entities
+    
+    NOTE: returning empty for all pages
+    """
+
+    print "fetchPAGE"
 
     # return empty for anything we don't know
     return { id : { } for id in entityIds }
