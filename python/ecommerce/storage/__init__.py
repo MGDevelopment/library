@@ -2,7 +2,7 @@
 '''S3 Content uploader module for ILHSA SA by Alejo Sanchez
 '''
 from os.path       import dirname, exists, join as os_path_join
-from os            import remove, makedirs, sep as os_sep
+from os            import remove, makedirs, sep
 from boto          import connect_s3
 from boto.s3.key   import Key
 from gzip          import GzipFile
@@ -85,7 +85,7 @@ class FilesystemStorage(BaseStorage):
                 headers: (ignored)
         '''
 
-        if name[0] == os_sep:
+        if name[0] == sep:
             name = name[1:] # Strip leading slash
         tname = os_path_join(self._directory, name)
         tdir = dirname(tname)
