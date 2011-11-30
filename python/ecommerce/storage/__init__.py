@@ -275,7 +275,7 @@ def getStorage(config, prefix, name):
         raise ValueError("ecommerce.storage.getStorage called with None parameter(s)")
 
     # try to get the type (default is "folder")
-    type = config.getMulti(prefix, name, "folder")
+    type = config.getMulti(prefix + "." + name, "type", "folder")
 
     # check is a type we know
     if type not in _types:
