@@ -266,6 +266,28 @@ def PAGE(row, rowBack = True):
 
 ########################################################
 #
+# treeBranch
+#
+
+def treeBranch(seccion):
+    """Return a tree given the seccion"""
+
+    return tree.baseTree(seccion)
+
+
+########################################################
+#
+# treePath
+#
+
+def treePath(seccion, grupo = -1, familia = -1, subfamilia = -1):
+    """Return the path of the tree"""
+
+    return tree.basePath(seccion, grupo, familia, subfamilia)
+
+
+########################################################
+#
 # cannonicals
 #
 
