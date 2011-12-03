@@ -259,4 +259,64 @@ def _loadFiles(path, idList, texts, entryBase):
 
     return texts
 
-__all__ = [ "getTexts" ]
+###################################################
+
+def author_texts(row):
+    """Check if the author has texts (biography) and add the content"""
+
+    # get a config object
+    config = ecommerce.config.getConfig()
+
+    # create an empty Text item in the record
+    row["Texts"] = [ ]
+
+    # if no contributor id => do nothing
+    if "ContributorId" not in row:
+        return row
+    contributorId = row["ContributorId"].to_integral_value()
+
+    # get the path to biographies
+    biographyPath = config.get("paths.biography")
+    if biographyPath is None:
+        return row
+
+    # check if there is a file
+    fname = biographyPath + os.sep + str(contributorId) + ".txt"
+    if os.path.exists(fname):
+
+        # read the file
+        text = None
+        try:
+            f = open(fname, "r")
+            text = tmklib.support.decode(f.read())
+            f.close()
+        except:
+            pass
+
+        # append only if there is text
+        if text is None:
+            return row
+
+        # try to figure out the text format
+        textFormat = "06"       # assume is plain text
+        if re.search("<[a-zA-Z]( |>|\/)?", text) is not None:
+            textFormat = "02"
+
+        # append the entry
+        row["Texts"].append( {
+            "EntityType"        : "CONT",
+            "EntityId"          : contributorId,
+            "ContributorId"     : contributorId,
+            "EntryCode"         : "13",
+            "EntryCode_list"    : "ONIX.33",
+            "EntryCode_desc"    : "Biographical note",
+            "TextFormat"        : textFormat,
+            "TextFormat_list"   : "ONIX.34",
+            "TextFormat_desc"   : "HTML" if textFormat == "02" else "Default text format",
+            "TextContent"       : text
+        } )
+
+    return row
+
+
+__all__ = [ "getTexts", "author_texts", "categories" ]
