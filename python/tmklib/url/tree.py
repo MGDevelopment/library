@@ -8,6 +8,8 @@ import ecommerce.db
 
 import tmklib.support
 
+import SUBJ
+
 _tree  = None
 _nodes = None
 
@@ -16,29 +18,41 @@ _nodes = None
 def baseTree(seccion):
     """Find the base tree"""
 
-    # load nodes (if needed)
-    _loadNodes()
-
     # return the node (none if not present)
     return _tree.get(seccion, { })
 
 ########################################################
 
+def _clone(node):
+    """Clone a node without the Children attribute"""
+
+    return {
+        "id"                        : node["id"],
+        "path"                      : node["path"],
+        "Categoria_Seccion"         : node["Categoria_Seccion"],
+        "Categoria_Grupo"           : node["Categoria_Grupo"],
+        "Categoria_Familia"         : node["Categoria_Familia"],
+        "Categoria_Subfamilia"      : node["Categoria_Subfamilia"],
+        "Nombre"                    : node["Nombre"],
+        "Descripcion"               : node["Descripcion"],
+        "level"                     : node["level"],
+        "Subtype"                   : node["Subtype"],
+        "LinkBase"                  : node["LinkBase"]    
+    }
+
+
 def basePath(seccion, grupo = -1, familia = -1, subfamilia = -1):
     """Return an array with the path from root to passed in node"""
 
-    # load nodes (if needed)
-    _loadNodes()
-
     # prepare the path
     path = [ ]
-    path.append(findNode(seccion))
+    path.append(_clone(findNode(seccion)))
     if grupo != -1:
-        path.append(findNode(seccion, grupo))
+        path.append(_clone(findNode(seccion, grupo)))
         if familia != -1:
-            path.append(findNode(seccion, grupo, familia))
+            path.append(_clone(findNode(seccion, grupo, familia)))
             if subfamilia != -1:
-                path.append(findNode(seccion, grupo, familia, subfamilia))
+                path.append(_clone(findNode(seccion, grupo, familia, subfamilia)))
 
     # return the path
     return path
@@ -47,9 +61,6 @@ def basePath(seccion, grupo = -1, familia = -1, subfamilia = -1):
 
 def findNode(seccion, grupo = -1, familia = -1, subfamilia = -1):
     """Find a node and return the information"""
-
-    # load nodes (if needed)
-    _loadNodes()
 
     # build the key
     key = (seccion, grupo, familia, subfamilia)
@@ -63,11 +74,6 @@ def _loadNodes():
     """Load the tree nodes"""
 
     global _nodes
-    global _tree
-
-    # only if not already loaded
-    if _nodes is not None:
-        return
 
     # prepare the dictionary
     nodes = { }
@@ -85,7 +91,8 @@ def _loadNodes():
                                     WHEN 4 THEN         'Música'
                                     WHEN 5 THEN         'Películas'
                                 END                             AS Nombre,
-                                C.Descripcion                   AS Descripcion
+                                C.Descripcion                   AS Descripcion,
+                                'Seccion'                       AS Subtype
                     FROM        Categ_Secciones C
                     WHERE       C.Categoria_Seccion IN (1, 3, 4, 5)
                     ORDER BY    C.Categoria_Seccion
@@ -98,7 +105,8 @@ def _loadNodes():
                                 -1                              AS Categoria_Familia,
                                 -1                              AS Categoria_Subfamilia,
                                 C.Descripcion                   AS Nombre,
-                                C.Descripcion                   AS Descripcion
+                                C.Descripcion                   AS Descripcion,
+                                'Grupo'                         AS Subtype
                     FROM        Categ_Grupos C
                     WHERE       C.Categoria_Seccion IN (1, 3, 4, 5)
                     ORDER BY    C.Categoria_Seccion, C.Categoria_Grupo
@@ -111,7 +119,8 @@ def _loadNodes():
                                 C.Categoria_Familia             AS Categoria_Familia,
                                 -1                              AS Categoria_Subfamilia,
                                 C.Descripcion                   AS Nombre,
-                                C.Descripcion                   AS Descripcion
+                                C.Descripcion                   AS Descripcion,
+                                'Familia'                       AS Subtype
                     FROM        Categ_Familias C
                     WHERE       C.Categoria_Seccion IN (1, 3, 4, 5)
                     ORDER BY    C.Categoria_Seccion, C.Categoria_Grupo,
@@ -125,7 +134,8 @@ def _loadNodes():
                                 C.Categoria_Familia             AS Categoria_Familia,
                                 C.Categoria_Subfamilia          AS Categoria_Subfamilia,
                                 C.Descripcion                   AS Nombre,
-                                C.Descripcion                   AS Descripcion
+                                C.Descripcion                   AS Descripcion,
+                                'Subfamilia'                    AS Subtype
                     FROM        Categ_Subfamilias C
                     WHERE       C.Categoria_Seccion IN (1, 3, 4, 5)
                     ORDER BY    C.Categoria_Seccion, C.Categoria_Grupo,
@@ -136,9 +146,6 @@ def _loadNodes():
 
     # everything ok => set the nodes
     _nodes = nodes
-
-    # build tree
-    _tree  = _buildTree()
 
 
 ########################################################
@@ -170,6 +177,7 @@ def _processQuery(nodes, id, level, query):
             "Nombre"                    : tmklib.support.decode(tmklib.support.capitalize(row[4]), encoding),
             "Descripcion"               : tmklib.support.decode(row[5], encoding),
             "level"                     : level,
+            "Subtype"                   : row[6],
             "Children"                  : [ ]       # used when building the tree
         }
 
@@ -181,6 +189,9 @@ def _processQuery(nodes, id, level, query):
 ########################################################
 
 def _buildTree():
+    """Given the list of nodes, build the tree of nodes"""
+
+    global _tree
 
     # get the keys of nodes, sorted
     keys = sorted(_nodes.keys())
@@ -242,4 +253,29 @@ def _buildTree():
     # create the final tree
     tree = { root["Children"][i]["id"] : root["Children"][i] for i in range(len(root["Children"])) }
 
-    return tree
+    _tree = tree
+
+########################################################
+
+def _buildURLs():
+    """Pass thru every node and build the LinkBase for it"""
+
+    global _nodes
+
+    # calculate the linkbase for each node
+    for k in _nodes:
+        _nodes[k] = SUBJ.SUBJ(_nodes[k])
+
+
+def _initialize():
+    """Initialize the component"""
+
+    # load nodes (if needed)
+    _loadNodes()
+
+    # build urls
+    _buildURLs()
+
+    # build tree
+    _buildTree()
+
