@@ -8,9 +8,6 @@ survive to support data extraction.
 by Jose Luis Campanello
 """
 
-def waste(x):
-    return x + "/" + x
-
 # Exported names
-__all__ = [ "support", "url" ]
+__all__ = [ "support", "fixes", "url", "PROD" ]
 

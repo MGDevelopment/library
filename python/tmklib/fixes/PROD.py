@@ -9,6 +9,7 @@ import ecommerce.config
 
 import tmklib.support
 
+
 ########################################################
 
 def title(row):
@@ -111,5 +112,18 @@ def embedRatings(row):
 
     # remove the ratings from the row
     del row["Ratings"]
+
+    return row
+
+########################################################
+
+def content_title(row):
+    """Capitalize the content (song) title"""
+
+    # capitalize the title
+    if "EffectiveTitle" in row:
+        row["EffectiveTitle"] = tmklib.support.capitalize(row["EffectiveTitle"])
+    else:
+        row["EffectiveTitle"] = None
 
     return row
