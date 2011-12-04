@@ -32,7 +32,7 @@ def SUBJ(row, rowBack = True):
 # PRODucts - categorias
 #
 
-def PROD(row, rowBack = True):
+def PROD(row, rowBack = True, entityIdVar = "EntityId"):
 
     # find the nodes
     seccion    = tree.findNode(row["Categoria_Seccion"], -1,
@@ -86,12 +86,22 @@ def PROD(row, rowBack = True):
                 tmklib.support.noDiacritics(
                     tmklib.support.capitalize(
                         row.get("Title")))).lower() + \
-           "--" + str(row["EntityId"])
+           "--" + str(row[entityIdVar])
 
     # set the url
     row["LinkBase"] = url
 
     return row if rowBack else url
+
+
+########################################################
+#
+# PRODucts related - categorias
+#
+
+def PRODRelated(row, rowBack = True):
+
+    return PROD(row, rowBack, "RelatedEntityId")
 
 
 ########################################################

@@ -39,7 +39,7 @@ def checkImageFile(base, template, variables):
     return ("/" + template) if os.path.isfile(fname) and os.path.getsize(fname) > 0 else None
 
 
-def calcImages(row):
+def calcImages(row, entityIdVar = "EntityId"):
     """Figure out if an Article has images and what the paths are
 
     Requires attributes:
@@ -61,7 +61,7 @@ def calcImages(row):
 
     # figure out the variables we want to pass
     variables = {
-        "EntityId"              : row.get("EntityId"),
+        "EntityId"              : row.get(entityIdVar),
         "Categoria_Seccion"     : row.get("Categoria_Seccion")
     }
 
@@ -90,6 +90,14 @@ def calcImages(row):
             break
 
     return row
+
+########################################################
+
+def calcImagesRelated(row):
+    """Calculates the images for a related entity"""
+
+    return calcImages(row, "RelatedEntityId")
+
 
 ########################################################
 
