@@ -90,8 +90,15 @@ class FilesystemStorage(BaseStorage):
             name = name[len(self.sep):] # Strip leading slash
         tname = self._directory + self.sep + name
         tdir = dirname(tname)
-        if not exists(tdir):
-            makedirs(tdir)
+        try:
+            if not exists(tdir):
+                #
+                # supposedly doesn't fail if directories
+                # appear, but it does fail!
+                #
+                makedirs(tdir)
+        except:
+            pass
         f = open(tname, 'w')
         f.write(src)
         f.close()

@@ -82,7 +82,7 @@ def SUBJ(row, rowBack = True):
         url += tmklib.support.alphaOnly(
                     tmklib.support.noDiacritics(
                         tmklib.support.capitalize(
-                            grupo["Nombre"]))).lower() + \
+                            grupo["Nombre"]))).strip("_").lower() + \
                "--" + str(grupo["id"]) + "/"
 
     # THIRD PART - seccion (family and bellow)
@@ -90,7 +90,7 @@ def SUBJ(row, rowBack = True):
         url += tmklib.support.alphaOnly(
                     tmklib.support.noDiacritics(
                         tmklib.support.capitalize(
-                            familia["Nombre"]))).lower() + \
+                            familia["Nombre"]))).strip("_").lower() + \
                "--" + str(familia["id"]) + "/"
 
     # FOURT PART - seccion (subfamily and bellow)
@@ -98,7 +98,7 @@ def SUBJ(row, rowBack = True):
         url += tmklib.support.alphaOnly(
                     tmklib.support.noDiacritics(
                         tmklib.support.capitalize(
-                            subfamilia["Nombre"]))).lower() + \
+                            subfamilia["Nombre"]))).strip("_").lower() + \
                "--" + str(subfamilia["id"]) + "/"
 
     # FILE EXTENSION (ONLY IF NOT "Seccion")

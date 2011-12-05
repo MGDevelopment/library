@@ -91,7 +91,7 @@ class QueueFolder(Queue):
         self._newFolder  = self._folder + os.sep + self._newFolder
         self._doneFolder = self._folder + os.sep + self._doneFolder
         self._workFolder = self._folder + os.sep + self._workFolder
-        self._pattern    = re.compile("[0-9]{20}-[0-9a-fA-F]{12}-[0-9a-fA-F]{8}" + self._ext)
+        self._pattern    = re.compile("^[0-9]{20}-[0-9a-fA-F]{12}-[0-9a-fA-F]{8}" + self._ext + "$")
 
         # only for consumer queue instances, but define for all
         self._seq      = Sequencer(0)

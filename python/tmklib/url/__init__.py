@@ -62,7 +62,7 @@ def PROD(row, rowBack = True, entityIdVar = "EntityId"):
         url += tmklib.support.alphaOnly(
                     tmklib.support.noDiacritics(
                         tmklib.support.capitalize(
-                            grupo["Nombre"]))).lower() + \
+                            grupo["Nombre"]))).strip("_").lower() + \
                "--" + str(grupo["id"]) + "/"
 
     # THIRD PART - familia (if any)
@@ -70,7 +70,7 @@ def PROD(row, rowBack = True, entityIdVar = "EntityId"):
         url += tmklib.support.alphaOnly(
                     tmklib.support.noDiacritics(
                         tmklib.support.capitalize(
-                            familia["Nombre"]))).lower() + \
+                            familia["Nombre"]))).strip("_").lower() + \
                "--" + str(familia["id"]) + "/"
 
     # FOURTH PART - subfamilia (if any)
@@ -78,14 +78,14 @@ def PROD(row, rowBack = True, entityIdVar = "EntityId"):
         url += tmklib.support.alphaOnly(
                     tmklib.support.noDiacritics(
                         tmklib.support.capitalize(
-                            subfamilia["Nombre"]))).lower() + \
+                            subfamilia["Nombre"]))).strip("_").lower() + \
                "--" + str(subfamilia["id"]) + "/"
 
     # FIFTH PART - title
     url += tmklib.support.alphaOnly(
                 tmklib.support.noDiacritics(
                     tmklib.support.capitalize(
-                        row.get("Title")))).lower() + \
+                        row.get("Title")))).strip("_").lower() + \
            "--" + str(row[entityIdVar])
 
     # set the url

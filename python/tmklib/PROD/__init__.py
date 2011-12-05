@@ -128,9 +128,9 @@ SELECT          A.Id_Articulo, A.Tipo, A.Parte, A.Tipo_Texto, A.Texto, A.Idioma,
             tipo        = row[1]
             parte       = int(row[2])
             tipo_texto  = row[3]
-            texto       = tmklib.support.decode("" if row[4] is None else row[4])
+            texto       = tmklib.support.decode("" if row[4] is None else row[4], 'iso-8859-1')
             idioma      = row[5]
-            tipo_desc   = tmklib.support.decode("" if row[6] is None else row[6])
+            tipo_desc   = tmklib.support.decode("" if row[6] is None else row[6], 'iso-8859-1')
 
             # convert tipo_texto
             tipos_texto     = {
@@ -223,7 +223,7 @@ def _loadFiles(path, idList, texts, entryBase):
         text = None
         try:
             f = open(fname, "r")
-            text = tmklib.support.decode(f.read())
+            text = tmklib.support.decode(f.read(), 'iso-8859-1')
             f.close()
         except:
             pass
@@ -288,7 +288,7 @@ def author_texts(row):
         text = None
         try:
             f = open(fname, "r")
-            text = tmklib.support.decode(f.read())
+            text = tmklib.support.decode(f.read(), 'iso-8859-1')
             f.close()
         except:
             pass
