@@ -22,7 +22,7 @@ def SUBJ(row, rowBack = True):
                          row.get("Categoria_Grupo",      -1),
                          row.get("Categoria_Familia",    -1),
                          row.get("Categoria_Subfamilia", -1))
-    row["LinkBase"] = node["LinkBase"]
+    row["LinkBase"] = "" if node is None else node["LinkBase"]
 
     return row if rowBack else row["LinkBase"]
 
