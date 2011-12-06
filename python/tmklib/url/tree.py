@@ -108,7 +108,22 @@ def _loadNodes():
                                 C.Descripcion                   AS Descripcion,
                                 'Grupo'                         AS Subtype
                     FROM        Categ_Grupos C
-                    WHERE       C.Categoria_Seccion IN (1, 3, 4, 5)
+                    WHERE       C.Categoria_Seccion IN (1, 3, 4, 5) AND
+                                (C.Categoria_Seccion, C.Categoria_Grupo) NOT IN (
+                                    SELECT      EA.Categoria_Seccion, EA.Categoria_Grupo
+                                        FROM    Estado_Articulos EA
+                                        WHERE   EA.Categoria_Seccion IS NOT NULL AND
+                                                EA.Categoria_Grupo IS NOT NULL AND
+                                                EA.Categoria_Familia IS NULL AND
+                                                EA.Categoria_Subfamilia IS NULL AND
+                                                EA.Estado != 'S' AND
+                                                EA.Editorial IS NULL AND
+                                                EA.Proveedor IS NULL AND
+                                                EA.Importe_Minimo IS NULL AND
+                                                EA.Importe_Maximo IS NULL AND
+                                                NVL (EA.Fecha_Desde, SYSDATE) <= SYSDATE AND
+                                                NVL (EA.Fecha_Hasta, SYSDATE) >= SYSDATE
+                                )
                     ORDER BY    C.Categoria_Seccion, C.Categoria_Grupo
                 """)
 
@@ -122,7 +137,24 @@ def _loadNodes():
                                 C.Descripcion                   AS Descripcion,
                                 'Familia'                       AS Subtype
                     FROM        Categ_Familias C
-                    WHERE       C.Categoria_Seccion IN (1, 3, 4, 5)
+                    WHERE       C.Categoria_Seccion IN (1, 3, 4, 5) AND
+                                (C.Categoria_Seccion, C.Categoria_Grupo,
+                                 C.Categoria_Familia) NOT IN (
+                                    SELECT      EA.Categoria_Seccion, EA.Categoria_Grupo,
+                                                EA.Categoria_Familia
+                                        FROM    Estado_Articulos EA
+                                        WHERE   EA.Categoria_Seccion IS NOT NULL AND
+                                                EA.Categoria_Grupo IS NOT NULL AND
+                                                EA.Categoria_Familia IS NOT NULL AND
+                                                EA.Categoria_Subfamilia IS NULL AND
+                                                EA.Estado != 'S' AND
+                                                EA.Editorial IS NULL AND
+                                                EA.Proveedor IS NULL AND
+                                                EA.Importe_Minimo IS NULL AND
+                                                EA.Importe_Maximo IS NULL AND
+                                                NVL (EA.Fecha_Desde, SYSDATE) <= SYSDATE AND
+                                                NVL (EA.Fecha_Hasta, SYSDATE) >= SYSDATE
+                                )
                     ORDER BY    C.Categoria_Seccion, C.Categoria_Grupo,
                                 C.Categoria_Familia
                 """)
@@ -137,7 +169,24 @@ def _loadNodes():
                                 C.Descripcion                   AS Descripcion,
                                 'Subfamilia'                    AS Subtype
                     FROM        Categ_Subfamilias C
-                    WHERE       C.Categoria_Seccion IN (1, 3, 4, 5)
+                    WHERE       C.Categoria_Seccion IN (1, 3, 4, 5) AND
+                                (C.Categoria_Seccion, C.Categoria_Grupo,
+                                 C.Categoria_Familia, C.Categoria_Subfamilia) NOT IN (
+                                    SELECT      EA.Categoria_Seccion, EA.Categoria_Grupo,
+                                                EA.Categoria_Familia, EA.Categoria_Subfamilia
+                                        FROM    Estado_Articulos EA
+                                        WHERE   EA.Categoria_Seccion IS NOT NULL AND
+                                                EA.Categoria_Grupo IS NOT NULL AND
+                                                EA.Categoria_Familia IS NOT NULL AND
+                                                EA.Categoria_Subfamilia IS NOT NULL AND
+                                                EA.Estado != 'S' AND
+                                                EA.Editorial IS NULL AND
+                                                EA.Proveedor IS NULL AND
+                                                EA.Importe_Minimo IS NULL AND
+                                                EA.Importe_Maximo IS NULL AND
+                                                NVL (EA.Fecha_Desde, SYSDATE) <= SYSDATE AND
+                                                NVL (EA.Fecha_Hasta, SYSDATE) >= SYSDATE
+                                )
                     ORDER BY    C.Categoria_Seccion, C.Categoria_Grupo,
                                 C.Categoria_Familia, C.Categoria_Subfamilia
                 """)
@@ -161,9 +210,20 @@ def _processQuery(nodes, id, level, query):
 
     # process entries
     for row in cursor:
+
         # build the key
         key = (int(row[0]), int(row[1]), int(row[2]), int(row[3]))
 
+        # check the parent is there...
+        if level > 0:
+            parent = (key[0],
+                      key[1] if level > 1 else -1,
+                      key[2] if level > 2 else -1,
+                      -1)
+            if parent not in nodes:
+                continue
+
+        # build the path
         path = ".".join( [ str(key[k]) for k in range(level + 1) ])
 
         # build the data
@@ -187,6 +247,18 @@ def _processQuery(nodes, id, level, query):
     return nodes
 
 ########################################################
+
+def _childrenSort(node):
+
+    # recurse the children
+    for i in range(len(node["Children"])):
+        node["Children"][i] = _childrenSort(node["Children"][i])
+
+    # sort our children
+    node["Children"] = sorted(node["Children"], key = lambda n: n["Descripcion"])
+
+    return node
+
 
 def _buildTree():
     """Given the list of nodes, build the tree of nodes"""
@@ -249,6 +321,9 @@ def _buildTree():
     #
     # the root node contains all the children trees
     #
+
+    # sort the children (recursive)
+    root = _childrenSort(root)
 
     # create the final tree
     tree = { root["Children"][i]["id"] : root["Children"][i] for i in range(len(root["Children"])) }

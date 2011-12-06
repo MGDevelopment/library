@@ -130,6 +130,7 @@ def fetch(entities, application = None):
             exception = ex      # keep the exception
 
         # if we have a dataset, solve the set
+        print "solving for %s/%s" % (entityType, datasetName)
         if dataset is not None:
             try:
                 dataList = solve(dataset, entityType, datasetName, idList)
@@ -155,8 +156,8 @@ def fetch(entities, application = None):
     else:
         result = [ (entity[0],
                     entity[1],
-                    fetchSets[ (entity[0], entity[2]) ]["result"][entity[1]][0],
-                    fetchSets[ (entity[0], entity[2]) ]["result"][entity[1]][1])
+                    fetchSets[ (entity[0], entity[2]) ]["result"].get(entity[1], ( True, "Missing key %s" % entity[1] ) )[0],
+                    fetchSets[ (entity[0], entity[2]) ]["result"].get(entity[1], ( True, "Missing key %s" % entity[1] ) )[1])
                    for entity in entities ]
 
     return result
