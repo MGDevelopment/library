@@ -16,6 +16,10 @@ def decode(value, encoding = None):
     if encoding is None:
         return value
 
+    # if not a string => just return as is
+    if not isinstance(value, types.StringType):
+        return value
+
     # only for strings (non-unicode)
     try:
         if isinstance(value, types.StringType):
@@ -90,7 +94,12 @@ def capitalize(s):
     s = swapArticulos(s, capitalize.rList, True)
 
     ######### FROM call to method capitalizarOriginal
-    s = s.title()
+    su = unicode(s, 'utf-8')
+    s  = su.title().encode('utf-8')
+    #
+    # JLUIS - the following leaves diacritics in the wrong case
+    #
+    #s = s.title()
 
     ######### FROM call to method minisculizar
     s = minusculizar(s)
