@@ -235,7 +235,12 @@ def solveQuery(dataset, entityType, datasetName, idList):
 
     # start fetching
     result = [ ] if format == "list" else { }
-    tRow = cursor.fetchone()
+    tRow = None
+    try:
+        tRow = cursor.fetchone()
+    except:
+        # empty result set is ok
+        pass
     rowNumber = 0
     while tRow is not None:
 

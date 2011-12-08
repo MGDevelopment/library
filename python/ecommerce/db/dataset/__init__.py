@@ -18,6 +18,8 @@ same name as second parameter to fetch.
 by Jose Luis Campanello
 """
 
+import traceback
+
 import ecommerce.config
 import ecommerce.db
 
@@ -124,9 +126,10 @@ def fetch(entities, application = None):
             # be sure to have a valid exception
             if not isinstance(ex, KeyError) and not isinstance(ex, DBDatasetRuntimeException):
                 # something else
+                err = traceback.format_exc()
                 ex = DBDatasetRuntimeException(
-                         "Generic Exception: type [%s] msg [%s]" %
-                         (ex.__class__.__name__, ex))
+                         "Generic Exception: type [%s] msg [%s], stack trace follows:\n%s" %
+                         (ex.__class__.__name__, ex, err))
             exception = ex      # keep the exception
 
         # if we have a dataset, solve the set
@@ -136,12 +139,11 @@ def fetch(entities, application = None):
                 dataList = solve(dataset, entityType, datasetName, idList)
                 dataList = { id : (False, dataList[id]) for id in dataList }
             except Exception as ex:
-                #
-                #
-                # TODO - COMPLETE THIS
-                #
-                #
-                exception = ex      # keep the exception
+                # generate error
+                err = traceback.format_exc()
+                exception = DBDatasetRuntimeException(
+                         "Generic Exception: type [%s] msg [%s], stack trace follows:\n%s" %
+                         (ex.__class__.__name__, ex, err))
 
         # if no datalist, build it from the exceptions
         if dataList is None:

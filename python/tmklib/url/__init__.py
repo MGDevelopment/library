@@ -18,11 +18,27 @@ import cannonical
 
 def SUBJ(row, rowBack = True):
 
+    # sanity check
+    if row is None:
+        return None
+
     node = tree.findNode(row.get("Categoria_Seccion",    -1),
                          row.get("Categoria_Grupo",      -1),
                          row.get("Categoria_Familia",    -1),
                          row.get("Categoria_Subfamilia", -1))
-    row["LinkBase"] = "" if node is None else node["LinkBase"]
+    linkBase = ""
+    if node is not None:
+        linkBase = node["LinkBase"]
+    else:
+        path = [ row.get("Categoria_Seccion",    -1),
+                 row.get("Categoria_Grupo",      -1),
+                 row.get("Categoria_Familia",    -1),
+                 row.get("Categoria_Subfamilia", -1) ]
+        path = [ str(p) for p in path if p != -1 ]
+        if len(path) == 0:
+            path = [ -1 ]
+        linkBase = ".".join(path)
+    row["LinkBase"] = linkBase
 
     return row if rowBack else row["LinkBase"]
 

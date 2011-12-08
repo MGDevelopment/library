@@ -26,6 +26,9 @@ def baseTree(seccion):
 def _clone(node):
     """Clone a node without the Children attribute"""
 
+    if node is None:
+        return None
+
     return {
         "id"                        : node["id"],
         "path"                      : node["path"],
@@ -53,6 +56,8 @@ def basePath(seccion, grupo = -1, familia = -1, subfamilia = -1):
             path.append(_clone(findNode(seccion, grupo, familia)))
             if subfamilia != -1:
                 path.append(_clone(findNode(seccion, grupo, familia, subfamilia)))
+
+    path = [ path[i] for i in range(len(path)) if path[i] is not None ]
 
     # return the path
     return path

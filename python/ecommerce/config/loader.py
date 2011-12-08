@@ -6,6 +6,7 @@ Config class. These loaders provide mechanisms for the configuration
 to be read from different places
 """
 
+import sys
 import os
 import os.path
 import platform
@@ -17,7 +18,8 @@ defaultFolders = [ './config', '/etc/ecommerce' ]
 if platform.system() == "Windows":
     defaultFolders = [ '.\\config', 'c:\\etc\\ecommerce' ]
 if "ECOMMERCE_CONFIG_DIR" in os.environ:
-    defaultFolders = os.environ["ECOMMERCE_CONFIG_DIR"].split(":")
+    sep = ";" if platform.system() == "Windows" else ":"
+    defaultFolders = os.environ["ECOMMERCE_CONFIG_DIR"].split(sep)
 
 defaultFragmentList = [ "global", "local" ]
 
