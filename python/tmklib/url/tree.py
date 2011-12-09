@@ -239,7 +239,7 @@ def _processQuery(nodes, id, level, query):
             "Categoria_Grupo"           : int(row[1]),
             "Categoria_Familia"         : int(row[2]),
             "Categoria_Subfamilia"      : int(row[3]),
-            "Nombre"                    : tmklib.support.decode(tmklib.support.capitalize(row[4]), encoding),
+            "Nombre"                    : tmklib.support.capitalize(tmklib.support.decode(row[4], encoding)),
             "Descripcion"               : tmklib.support.decode(row[5], encoding),
             "level"                     : level,
             "Subtype"                   : row[6],

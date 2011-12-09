@@ -127,7 +127,7 @@ SELECT      Id_Articulo             AS ProductId,
             "Categoria_Grupo"       : grupo,
             "Categoria_Familia"     : familia,
             "Categoria_Subfamilia"  : subfamilia,
-            "Title"                 : title
+            "Title"                 : tmklib.support.decode(title, 'iso-8859-1')
         } )
 
         # next row
