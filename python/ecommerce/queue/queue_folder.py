@@ -250,7 +250,7 @@ class QueueFolder(Queue):
         # delete or move the item
         if self._keep:
             # move to done folder
-            self._move(item, self._doneFolder, self._workFolder)
+            self._move(item, self._doneFolder, self._workFolder, True)
         else:
             # remove the item
             self._delete(item, self._workFolder)
@@ -273,7 +273,7 @@ class QueueFolder(Queue):
             raise QueueRuntimeException("Queue is not a consumer")
 
         # move to error folder
-        self._move(item, self._errFolder, self._workFolder)
+        self._move(item, self._errFolder, self._workFolder, True)
 
         # change item status
         item._status = "error"
@@ -385,7 +385,7 @@ class QueueFolder(Queue):
         os.remove(fname)
 
 
-    def _move(self, item, dst, src = None):
+    def _move(self, item, dst, src = None, dated = False):
         """Move the item file to a subfolder
 
         Path manipulation is done manualy because of windows removing the
@@ -400,9 +400,34 @@ class QueueFolder(Queue):
         if src is None:
             src = self._folder
 
+        # if dst path is dated, add the YYYY-MM/YYYY-MM-DD
+        datedpath = ""
+        if dated:
+            # format the parts
+            ltime     = time.localtime()
+            part1     = os.sep + time.strftime("%Y-%m", ltime)
+            part2     = os.sep + time.strftime("%Y-%m-%d", ltime)
+
+            # create the part1 (if needed)
+            if not os.path.exists(dst + part1):
+                try:
+                    os.mkdir(dst + part1)
+                except:
+                    pass
+
+            # create the part2 (if needed)
+            if not os.path.exists(dst + part1 + part2):
+                try:
+                    os.mkdir(dst + part1 + part2)
+                except:
+                    pass
+
+            # the dated path
+            datedpath = part1 + part2
+
         # item is in the queue folder
         srcPath = src + os.sep + item.id + self._ext
-        dstPath = dst + os.sep + item.id + self._ext
+        dstPath = dst + datedpath + os.sep + item.id + self._ext
 
         # move the file
         shutil.move(srcPath, dstPath)
