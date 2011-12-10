@@ -238,7 +238,21 @@ def solveQuery(dataset, entityType, datasetName, idList):
     tRow = None
     try:
         tRow = cursor.fetchone()
-    except:
+    except Exception as ex:
+        ###import traceback
+        ###import pprint
+        ###err = traceback.format_exc()
+        ###exWaste = {
+        ###    "exception":    ex,
+        ###    "trace":        err,
+        ###    "query":        query,
+        ###    "datasetName":  datasetName,
+        ###    "entityType":   entityType,
+        ###    "idList":       idList,
+        ###    "dataset":      dataset,
+        ###    "rowdef":       cursor.description
+        ###}
+        ###pprint.pprint(exWaste, open("error_dump.txt", "a+"), 4)
         # empty result set is ok
         pass
     rowNumber = 0

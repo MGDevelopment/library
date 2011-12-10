@@ -36,7 +36,7 @@ def categories(row):
 
     ##########################################
     # grupo
-    if cat_grupo != -1:
+    if cat_grupo != -1 and grupo is not None:
         categories.append( {
             "Title"     : tmklib.support.capitalize(grupo["Nombre"]),
             "URL"       : "/buscador/productos.jsp?" + urllib.urlencode( {
@@ -51,7 +51,7 @@ def categories(row):
 
     ##########################################
     # familia
-    if cat_familia != -1:
+    if cat_familia != -1 and familia is not None:
         categories.append( {
             "Title"     : tmklib.support.capitalize(familia["Nombre"]),
             "URL"       : "/buscador/productos.jsp?" + urllib.urlencode( {
@@ -67,7 +67,7 @@ def categories(row):
 
     ##########################################
     # subfamilia
-    if cat_subfamilia != -1:
+    if cat_subfamilia != -1 and subfamilia is not None:
         categories.append( {
             "Title"     : tmklib.support.capitalize(subfamilia["Nombre"]),
             "URL"       : "/buscador/productos.jsp?" + urllib.urlencode( {

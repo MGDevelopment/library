@@ -180,7 +180,8 @@ mayusculizar.words = [                              \
     #roman numbers
     " Ii ", " Iii ", " Iv ", " Vi ", " Vii ",       \
     " Viii ", " Ix ", " Xi ", " Xii ", " Xiii ",    \
-    " Xiv", " Xv "                                  \
+    " Xiv", " Xv ", " Xvi ", " Xvii ", " Xviii ",   \
+    " Xix ", " Xx ", " Xxi "
 ]
 
 ########################################################
@@ -197,7 +198,7 @@ def minusculizar(s):
         pos = s.find(word)
         if pos > 0:             # only if not at the begining
             if not s[pos - 1] in "./:-#!#?{}()[]":      # previous not a termination
-                if s[pos + len(word)] in " ./:-#!#?{}()[]":
+                if (pos + len(word)) < len(s) and s[pos + len(word)] in " ./:-#!#?{}()[]":
                     s = s.replace(word, word.lower())
 
     return s
