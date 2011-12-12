@@ -8,6 +8,7 @@ import os.path
 import ecommerce.config
 
 import tmklib.support
+import tmklib.cache
 
 
 ########################################################
@@ -24,6 +25,17 @@ def title(row):
     return row
 
 ########################################################
+
+def checkImage(imagelist, base, template, variables):
+    """Try to find an image file that responds to macro expansion"""
+
+    # try expanding each variable
+    for v in variables:
+        template = template.replace("{{" + v + "}}", str(variables[v]))
+
+    # if template is in imagelist => we got it
+    return "/" + template if template in imagelist else None
+
 
 def checkImageFile(base, template, variables):
     """Try to find an image file that responds to macro expansion"""
@@ -65,11 +77,16 @@ def calcImages(row, entityIdVar = "EntityId"):
         "Categoria_Seccion"     : row.get("Categoria_Seccion")
     }
 
+    # query the cache to find the images
+    imagelist = tmklib.cache.findImages(variables["EntityId"])
+    if imagelist is None:
+        imagelist = [ ]
+
     # try to find the small image
     row["CoverSmall"] = None
     row["CoverSmallGeneric"] = True
     for i in range(len(small)):
-        path = checkImageFile(basePath, small[i], variables)
+        path = checkImage(imagelist, basePath, small[i], variables)
         if path is not None:
             row["CoverSmall"] = path
             row["CoverSmallGeneric"] = False
@@ -84,7 +101,7 @@ def calcImages(row, entityIdVar = "EntityId"):
     # try to find the large image
     row["CoverLarge"] = None
     for i in range(len(large)):
-        path = checkImageFile(basePath, large[i], variables)
+        path = checkImage(imagelist, basePath, large[i], variables)
         if path is not None:
             row["CoverLarge"] = path
             break

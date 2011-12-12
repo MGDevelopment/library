@@ -9,5 +9,5 @@ by Jose Luis Campanello
 """
 
 # Exported names
-__all__ = [ "support", "fixes", "url", "PROD" ]
+__all__ = [ "support", "cache", "fixes", "url", "PROD" ]
 

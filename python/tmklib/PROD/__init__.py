@@ -13,6 +13,7 @@ import ecommerce.config
 import ecommerce.db
 
 import tmklib.support
+import tmklib.cache
 
 import tmklib.url.tree
 
@@ -172,7 +173,7 @@ SELECT          A.Id_Articulo, A.Tipo, A.Parte, A.Tipo_Texto, A.Texto, A.Idioma,
     # append first-chapters to texts
     firstChapterPath = config.get("paths.firstChapter")
     if firstChapterPath is not None:
-        texts = _loadFiles(firstChapterPath, idList, texts, {
+        texts = _loadFiles("firstChapter", firstChapterPath, idList, texts, {
             "EntityType"        : "PROD",
             "EntryCode"         : "24",
             "EntryCode_list"    : "ONIX.33",
@@ -182,7 +183,7 @@ SELECT          A.Id_Articulo, A.Tipo, A.Parte, A.Tipo_Texto, A.Texto, A.Idioma,
     # append interviews to texts
     interviewsPath = config.get("paths.interviews")
     if firstChapterPath is not None:
-        texts = _loadFiles(interviewsPath, idList, texts, {
+        texts = _loadFiles("interview", interviewsPath, idList, texts, {
             "EntityType"        : "PROD",
             "EntryCode"         : "40",
             "EntryCode_list"    : "ONIX.33",
@@ -209,15 +210,22 @@ SELECT          A.Id_Articulo, A.Tipo, A.Parte, A.Tipo_Texto, A.Texto, A.Idioma,
 
 ###################################################
 
-def _loadFiles(path, idList, texts, entryBase):
+def _loadFiles(fileType, path, idList, texts, entryBase):
     """Scan the idList to see if some data is available in the specified path"""
 
     for i in range(len(idList)):
 
+        # check the cache to get the path
+        fname = None
+        if fileType == "firstChapter":
+            fname = tmklib.cache.findFirstChapter(idList[i])
+        if fileType == "interview":
+            fname = tmklib.cache.findInterview(idList[i])
+        if fname is None:
+            continue            # not in cache => not present...
+
         # if no file => next
-        fname = path + os.sep + str(idList[i]) + ".txt"
-        if not os.path.isfile(fname):
-            continue
+        fname = path + os.sep + fname
 
         # get the file contents
         text = None
@@ -275,23 +283,21 @@ def author_texts(row):
         return row
     contributorId = row["ContributorId"].to_integral_value()
 
-    # get the path to biographies
-    biographyPath = config.get("paths.biography")
-    if biographyPath is None:
+    # get the file name from the cache
+    fname = tmklib.cache.findBiography(contributorId)
+    if fname is None:
         return row
 
-    # check if there is a file
-    fname = biographyPath + os.sep + str(contributorId) + ".txt"
-    if os.path.exists(fname):
+    # get the path to biographies
+    biographyPath = config.get("paths.biography")
+    fname = biographyPath + os.sep + fname
 
-        # read the file
-        text = None
-        try:
-            f = open(fname, "r")
-            text = tmklib.support.decode(f.read(), 'iso-8859-1')
-            f.close()
-        except:
-            pass
+    # read the file
+    text = None
+    try:
+        f = open(fname, "r")
+        text = tmklib.support.decode(f.read(), 'iso-8859-1')
+        f.close()
 
         # append only if there is text
         if text is None:
@@ -315,6 +321,8 @@ def author_texts(row):
             "TextFormat_desc"   : "HTML" if textFormat == "02" else "Default text format",
             "TextContent"       : text
         } )
+    except:
+        pass
 
     return row
 
