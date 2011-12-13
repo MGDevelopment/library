@@ -83,12 +83,23 @@ def capitalize(s):
     ######### FROM method corregir
 
     # trim, uppercase and do some replacements
-    s = s.strip().upper().replace("\\.", " .",  1). \
-                          replace(",",   " , ", 1). \
-                          replace(";",   " ; ", 1). \
-                          replace("-",   " - ", 1). \
-                          replace("/",   " / ", 1). \
-                          replace("  ",  " ")
+    #
+    # NOTE: this can look nice as s.replace(...).replace(...) but
+    #       creating strings like that kills performance...
+    #
+    s = s.strip().upper()
+    if "\\." in s:
+        s = s.replace("\\.", " .",  1)
+    if "," in s:
+        s = s.replace(",", " , ",  1)
+    if ";" in s:
+        s = s.replace(";", " ; ",  1)
+    if "-" in s:
+        s = s.replace("-", " - ",  1)
+    if "/" in s:
+        s = s.replace("/", " / ",  1)
+    if "  " in s:
+        s = s.replace("  ", " ")
 
     # swap articulos (ej: "inmortales, los" => "los inmortales")
     s = swapArticulos(s, capitalize.rList, True)
@@ -108,10 +119,17 @@ def capitalize(s):
     s = mayusculizar(s)
 
     # some replacements and trim
-    s = s.replace(" \\.", ".", 1). \
-          replace(" ,",   ",", 1). \
-          replace(" ;",   ";", 1). \
-          strip()
+    #
+    # NOTE: this can look nice as s.replace(...).replace(...) but
+    #       creating strings like that kills performance...
+    #
+    if " \\." in s:
+        s = s.replace(" \\.", ".",  1)
+    if " ," in s:
+        s = s.replace(" ,", ",",  1)
+    if " ;" in s:
+        s = s.replace(" ;", ";",  1)
+    s = s.strip()
 
     return s
 capitalize.rList = [   \
@@ -149,7 +167,12 @@ def swapArticulos(s, rList, fullReplacement = True):
 
         # replace
         for r in rList:
-            if s[spot - len(r[0]):spot] == r[0]:
+            #
+            # the endswith performs a find but does not create
+            # a new string
+            #
+            ####if s[spot - len(r[0]):spot] == r[0]:
+            if s.endswith(r[0], spot - len(r[0]), spot):
                 if lastSpot == 0:
                     # move to the begining
                     s = r[1] + s[:spot - len(r[0])] + s[spot:]
@@ -212,7 +235,7 @@ minusculizar.words = [ \
     "Por", "Que", "Se", "Ser", "Sin", "Sobre",          \
     "Sola", "Solo", "Son", "Soy", "Su", "Sus",          \
     "Te", "Tema", "Tiene", "Toda", "Todas", "Tres",     \
-    "Tu", "Un", "Una", "Unas", "Uno", "Unos", "Va",     \
+    "Tu", "Un", "Una", "Unas", "Uno", "Unos", "Va"      \
 ]
 
 

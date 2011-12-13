@@ -8,6 +8,7 @@ does what is needed to retrieve the information from the database.
 by Jose Luis Campanello
 """
 
+import time
 import os
 import os.path
 import platform
@@ -33,7 +34,7 @@ _postCode = { }
 _code = { }
 
 
-def solve(dataset, entityType, datasetName, idList):
+def solve(dataset, entityType, datasetName, idList, connSet = { }):
     """Solve the dataset for the list of entities
 
     The received dataset (a dictionary) is used to fetch information
@@ -43,6 +44,10 @@ def solve(dataset, entityType, datasetName, idList):
     list is returned in the same order indicated by idList.
     """
 
+    # be sure to have a connection set
+    if connSet is None:
+        connSet = { }
+
     # figure out the type of result
     single = dataset.get("single", False)
 
@@ -50,13 +55,13 @@ def solve(dataset, entityType, datasetName, idList):
     result = None
 
     # execute the query or code (if any)
-    result = solveMain(dataset, entityType, datasetName, idList)
+    result = solveMain(dataset, entityType, datasetName, idList, connSet)
 
     # do augmentation ONLY if single
     if single:
 
         # get the augment result (if any)
-        partial = solveAugment(dataset, entityType, datasetName, idList)
+        partial = solveAugment(dataset, entityType, datasetName, idList, connSet)
 
         # import the augment result into the result
         if partial is not None:
@@ -72,7 +77,7 @@ def solve(dataset, entityType, datasetName, idList):
     return result
 
 
-def solveMain(dataset, entityType, datasetName, idList):
+def solveMain(dataset, entityType, datasetName, idList, connSet):
     """Generic solve that decides if sql or code must be executed
 
     This returns a dictionary where each entry of idList is a key and
@@ -88,7 +93,7 @@ def solveMain(dataset, entityType, datasetName, idList):
     #
     if dataset.get("query.sql") is not None:
         # execute the query and import the result
-        result = solveQuery(dataset, entityType, datasetName, idList)
+        result = solveQuery(dataset, entityType, datasetName, idList, connSet)
     else:
         if dataset.get("code.name") is not None:
             # execute the named function
@@ -97,7 +102,7 @@ def solveMain(dataset, entityType, datasetName, idList):
     return result
 
 
-def solveAugment(dataset, entityType, datasetName, idList, attributeName = "augment"):
+def solveAugment(dataset, entityType, datasetName, idList, connSet, attributeName = "augment"):
     """Solve the augment set and return a dictionary with the results"""
 
     # this always returns a dictionary
@@ -111,7 +116,10 @@ def solveAugment(dataset, entityType, datasetName, idList, attributeName = "augm
         for a in augment:
 
             # solve the query or code
-            result[a] = solveMain(augment[a], entityType, datasetName, idList)
+            tStart = time.time()
+            result[a] = solveMain(augment[a], entityType, datasetName, idList, connSet)
+            tEnd = time.time()
+            print "solving for %s/%s augment %s -- took %.3f seconds" % (entityType, datasetName, a, tEnd - tStart)
 
     return result
 
@@ -131,7 +139,7 @@ def decode(value, encoding = None):
     return value
 
 
-def solveQuery(dataset, entityType, datasetName, idList):
+def solveQuery(dataset, entityType, datasetName, idList, connSet):
     """Solve the query, possibly doing a manual join of augments
 
     This returns a dictionary where each key is an id from idList and
@@ -144,7 +152,7 @@ def solveQuery(dataset, entityType, datasetName, idList):
     augmentKeys = { }
     if "query.augment" in dataset:
         augmenting = True
-        augment = solveAugment(dataset, entityType, datasetName, idList, "query.augment")
+        augment = solveAugment(dataset, entityType, datasetName, idList, connSet, "query.augment")
 
         # get the augment keys (if present)
         augments = dataset["query.augment"]
@@ -168,6 +176,9 @@ def solveQuery(dataset, entityType, datasetName, idList):
         raise DBDatasetConfigurationException(
                   "query.columns not present in [%s/%s]" %
                   (entityType, datasetName) )
+
+    # get the filter column name (filters the column is on idList or ignores the record)
+    filter = dataset.get("query.filter")
 
     # get the output format
     format = dataset.get("query.output")
@@ -216,16 +227,22 @@ def solveQuery(dataset, entityType, datasetName, idList):
 
     # get the db name, encoding (if any) and loose type mark
     dbname    = dataset.get("database")
+    setname   = "__default__" if dbname is None else dbname
     loose     = ecommerce.db.hasLooseTypes(dbname)
     encoding  = ecommerce.db.hasEncoding(dbname)
     coerce    = None if not loose else dataset.get("query.coerce")
 
     # get a db connection
-    conn   = ecommerce.db.getConnection(dbname)
+    if setname not in connSet:
+        connSet[setname] = ecommerce.db.getConnection(dbname)
+    conn   = connSet[setname]
     cursor = conn.cursor()
 
     # execute the query
+    tStart = time.time()
     cursor.execute(query)
+    tEnd = time.time()
+    #print "Query execute -- took %.3f seconds" % (tEnd - tStart)
 
     # check the result has at least as many columns as we are expecting
     if len(cursor.description) < len(columns):
@@ -259,7 +276,22 @@ def solveQuery(dataset, entityType, datasetName, idList):
     while tRow is not None:
 
         # build the row dictionary
-        row = { columns[i] : decode(tRow[i], encoding) for i in range(len(columns)) }
+        row = { columns[i] : decode(tRow[i], encoding)
+                for i in range(len(columns)) }
+
+        # if there is a filter, filter
+        if filter is not None:
+            try:
+                id = int(row[filter])
+            except:
+                id = None
+            if id is None or id not in idList:
+
+                # fetch next row
+                tRow = cursor.fetchone()
+                ####rowNumber += 1          # do not increment
+
+                continue
 
         # if loose types and have something to coerce, do so
         if loose and (coerce is not None):
@@ -338,7 +370,6 @@ def solveQuery(dataset, entityType, datasetName, idList):
 
     # close cursor and connection
     cursor.close()
-    conn.close()
 
     # if query is static, return element 0 as "__all__" 
     if isStatic:
@@ -366,6 +397,15 @@ def solveQuerySQL(dataset, entityType, datasetName, idList):
     pks = { id : " " + prefix + id + " IN (" + \
                      (", ".join([ str(idList[i]) for i in range(len(idList))] ) ) + \
                  ") " for id in queryIds }
+    for id in queryIds:
+        minId = min(idList)
+        maxId = max(idList)
+        if (maxId - minId) < 1000:
+            pks[id + "#BETWEEN"] = prefix + id + \
+                                   " BETWEEN " + str(minId) + \
+                                   " AND " + str(maxId)
+        else:
+            pks[id + "#BETWEEN"] = pks[id]
     pks["ID:EntityType"] = (" " + prefix + "EntityType = '" + entityType + "' ")
 
     # build the list of local vars

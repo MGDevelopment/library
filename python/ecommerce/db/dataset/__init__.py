@@ -18,6 +18,7 @@ same name as second parameter to fetch.
 by Jose Luis Campanello
 """
 
+import time
 import traceback
 
 import ecommerce.config
@@ -133,10 +134,11 @@ def fetch(entities, application = None):
             exception = ex      # keep the exception
 
         # if we have a dataset, solve the set
-        print "solving for %s/%s" % (entityType, datasetName)
+        tStart = time.time()
+        connSet = { }
         if dataset is not None:
             try:
-                dataList = solve(dataset, entityType, datasetName, idList)
+                dataList = solve(dataset, entityType, datasetName, idList, connSet)
                 dataList = { id : (False, dataList[id]) for id in dataList }
             except Exception as ex:
                 # generate error
@@ -144,6 +146,8 @@ def fetch(entities, application = None):
                 exception = DBDatasetRuntimeException(
                          "Generic Exception: type [%s] msg [%s], stack trace follows:\n%s" %
                          (ex.__class__.__name__, ex, err))
+        tEnd = time.time()
+        print "solving for %s/%s -- took %.3f seconds" % (entityType, datasetName, tEnd - tStart)
 
         # if no datalist, build it from the exceptions
         if dataList is None:

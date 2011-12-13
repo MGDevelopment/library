@@ -231,6 +231,14 @@ def _processQuery(nodes, id, level, query):
         # build the path
         path = ".".join( [ str(key[k]) for k in range(level + 1) ])
 
+        # decode the name (if needed)
+        if key[1] == -1 and key[2] == -1 and key[3] == -1:
+            # section - name is already UTF-8
+            nombre = tmklib.support.capitalize(row[4])
+        else:
+            # from db - in iso-8859-1, decode
+            nombre = tmklib.support.capitalize(tmklib.support.decode(row[4], encoding))
+
         # build the data
         data = {
             "id"                        : int(key[id]),
@@ -239,7 +247,7 @@ def _processQuery(nodes, id, level, query):
             "Categoria_Grupo"           : int(row[1]),
             "Categoria_Familia"         : int(row[2]),
             "Categoria_Subfamilia"      : int(row[3]),
-            "Nombre"                    : tmklib.support.capitalize(tmklib.support.decode(row[4], encoding)),
+            "Nombre"                    : nombre,
             "Descripcion"               : tmklib.support.decode(row[5], encoding),
             "level"                     : level,
             "Subtype"                   : row[6],
