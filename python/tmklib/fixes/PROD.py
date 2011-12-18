@@ -110,6 +110,21 @@ def calcImages(row, entityIdVar = "EntityId"):
 
 ########################################################
 
+def filterWithoutImage(row):
+    """Returns False if the product has a default image.
+    
+    Use after calcImages in showcases
+    """
+
+    # sanity check
+    if row is None or "CoverSmallGeneric" not in row:
+        return row
+
+    # check the small image is not generic
+    return False if row["CoverSmallGeneric"] else row
+
+########################################################
+
 def calcImagesRelated(row):
     """Calculates the images for a related entity"""
 

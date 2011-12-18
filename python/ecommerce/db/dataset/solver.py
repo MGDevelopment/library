@@ -289,8 +289,6 @@ def solveQuery(dataset, entityType, datasetName, idList, connSet):
 
                 # fetch next row
                 tRow = cursor.fetchone()
-                ####rowNumber += 1          # do not increment
-
                 continue
 
         # if loose types and have something to coerce, do so
@@ -345,6 +343,13 @@ def solveQuery(dataset, entityType, datasetName, idList, connSet):
             for i in range(len(post)):
                 # process function i
                 row = postProcess(post[i], row)
+                if row == False:
+                    # signal from the post-processing to ignore...
+                    break
+        if row == False:
+            # fetch next row
+            tRow = cursor.fetchone()
+            continue
 
         # add the row to the result
         if format is not None:
