@@ -17,6 +17,8 @@ import tmklib.cache
 
 import tmklib.url.tree
 
+from price import calculateTaxes
+
 ###################################################
 
 def categories(row):
