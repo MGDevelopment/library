@@ -1,0 +1,108 @@
+#
+# db config
+#
+db:
+    default:        eCommerce               # default database
+    databases:      [ "eCommerce" ]         # list of defined databases
+    python:
+        <<:         *global_db_python       # get the python modules config
+    eCommerce:                              # get eCommerce database and overide the host ip
+        <<:         *global_db_eCommerce
+    test:                                   # get the test database
+        <<:         *global_db_test
+    dataset:                                # configuration of the dataset module
+        <<:         *global_db_dataset
+    codetables:                             # configuration for the codetables module
+        <<:         *global_db_codetables
+
+#
+# keychain config
+#
+keychain:                                   # get the keychain
+    <<:             *global_keychain
+
+#
+# paths
+#
+paths:
+    base:       S:\\Tematika
+    resources:  S:\\Tematika\\Recursos
+    covers:     S:\\Tematika\\Recursos\\Tapas
+    cover:
+        ##### DO NOT PUT LEADING SLASHES ON TEMPLATE FILE NAMES
+        small:      [ "tapas/sitio/{{EntityId}}c0.jpg", "tapas/chicas/{{EntityId}}.jpg" ]
+        small-def:  "tapas/adicionales/sinImagen_{{Categoria_Seccion}}.jpg"
+        large:      [ "tapas/sitio/{{EntityId}}g0.jpg", "tapas/grandes/{{EntityId}}.jpg" ]
+
+
+#
+# dataset constants
+#
+constants:
+    content:
+        secciones:
+            all:             "1, 3, 4, 5"
+            book:            1
+            music:           4
+            movie:           5
+            game:            3
+        classics:
+            days:            730     # 2 years old and still top selling => it's a classic
+        categories:
+            books:
+                idtype:      118
+                idvalue:     com.ilhsa.category.1
+                subjectid:   1
+            movies:
+                idtype:      118
+                idvalue:     com.ilhsa.category.5
+                subjectid:   676
+            music:
+                idtype:      118
+                idvalue:     com.ilhsa.category.4
+                subjectid:   636
+            games:
+                idtype:      118
+                idvalue:     com.ilhsa.category.3
+                subjectid:   570
+
+#
+# content generation
+#
+content:
+    daemon:
+        maxrun:     3600        # max number of seconds to run
+                                # the program is expected to terminate
+                                # after this many seconds
+        threads:    16
+    urls:
+        static:             http://www.testmatika.com
+        dynamic:            http://www.testmatika.com
+        search:             http://www.testmatika.com
+        checkout:           http://www.testmatika.com
+        service:            http://www.testmatika.com
+        images:             http://img-tmk.testmatika.com
+        data:               http://www.testmatika.com
+    repositories:
+        dynamic:
+            type:           folder
+            path:           S:\Tematika\Recursos\stage0
+        static:
+            type:           folder
+            path:           S:\Tematika\Recursos\stage0
+        #test:
+        #    type:           s3
+        #    bucket:         beta1.testmatika.com
+        #    dir:
+        #    gzip:           true
+        #    cache:          public,max-age=3600
+        #    access-key:     keychain:test-storage:access-key
+        #    secret-key:     keychain:test-storage:secret-key
+    dataset:                                # configuration of the dataset module
+        database:   eCommerce               # the default database
+        loader:     folder                  # folder loading
+        paths:      [ "./dataset", "./content/dataset" ] # directory where datasets are stored
+    queue:
+        type:       folder
+        folder:     c:\tmp\queue
+        keep:       True

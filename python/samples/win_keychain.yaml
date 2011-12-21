@@ -1,0 +1,23 @@
+#
+# keychain file
+#
+master-key:
+    # some hexa value
+    data:
+        password:   44335522661177
+    algorithm:      master-key
+eCommerce-db:
+    data:
+        password:   test
+    algorithm:
+test-storage:
+    data:
+        access-key: some-value
+        secret-key: some-value
+    algorithm:
+some-other-key:
+    # some hexa value
+    data:
+        password:   44335522661177
+    algorithm:      3DES-cbc
+    key:            master-key

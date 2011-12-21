@@ -1,0 +1,152 @@
+#
+# db config
+#
+db:
+    default:        eCommerce               # default database
+    databases:      [ "eCommerce", "fscache" ]         # list of defined databases
+    python:
+        <<:         *global_db_python       # get the python modules config
+    eCommerce:                              # get eCommerce database and overide the host ip
+        <<:         *global_db_eCommerce
+    fscache:                                # get the file system cache database
+        <<:         *global_db_fscache
+    test:                                   # get the test database
+        <<:         *global_db_test
+    dataset:                                # configuration of the dataset module
+        <<:         *global_db_dataset
+    codetables:                             # configuration for the codetables module
+        <<:         *global_db_codetables
+
+#
+# keychain config
+#
+keychain:                                   # get the keychain
+    <<:             *global_keychain
+
+#
+# paths
+#
+paths:
+    base:       S:\
+    resources:  S:\Recursos
+    covers:     S:\Recursos\Tapas
+    covers-small:   S:\Recursos\Tapas\chicas
+    covers-large:   S:\Recursos\Tapas\grandes
+    covers-site:    S:\Recursos\Tapas\sitio
+    cover:
+        ##### DO NOT PUT LEADING SLASHES ON TEMPLATE FILE NAMES
+        small:      [ "tapas/sitio/{{EntityId}}c0.jpg", "tapas/chicas/{{EntityId}}.jpg" ]
+        small-def:  "tapas/adicionales/sinImagen_{{Categoria_Seccion}}.jpg"
+        large:      [ "tapas/sitio/{{EntityId}}g0.jpg", "tapas/grandes/{{EntityId}}.jpg" ]
+    interviews: S:\Recursos\asociadas\entrevistas
+    firstChapter:   S:\Recursos\asociadas\capitulos
+    biography:  S:\Recursos\asociadas\biografias
+    cache:
+        name:                   fscache
+        prefix.image.small:     tapas/chicas/
+        prefix.image.large:     tapas/grandes/
+        prefix.image.sitio:     tapas/sitio/
+        table.image:            tbl_images
+        table.interview:        tbl_interview
+        table.firstChapter:     tbl_firstChapter
+        table.biography:        tbl_biography
+
+
+#
+# dataset constants
+#
+constants:
+    content:
+        secciones:
+            all:             "1, 3, 4, 5"
+            book:            1
+            music:           4
+            movie:           5
+            game:            3
+        classics:
+            days:            730     # 2 years old and still top selling => it's a classic
+        categories:
+            books:
+                idtype:      118
+                idvalue:     com.ilhsa.category.1
+                subjectid:   1
+            movies:
+                idtype:      118
+                idvalue:     com.ilhsa.category.5
+                subjectid:   676
+            music:
+                idtype:      118
+                idvalue:     com.ilhsa.category.4
+                subjectid:   636
+            games:
+                idtype:      118
+                idvalue:     com.ilhsa.category.3
+                subjectid:   570
+
+#
+# content generation
+#
+content:
+    daemon:
+        maxrun:     286400      # max number of seconds to run
+                                # the program is expected to terminate
+                                # after this many seconds
+        threads:    16
+    templates:
+        folder:             ./templates
+    urls:
+        static:             http://www.tematika.com
+        dynamic:            http://www.tematika.com
+        search:             http://www.tematika.com
+        checkout:           http://www.tematika.com
+        service:            http://www.tematika.com
+        images:             http://img-tmk.tematika.com
+        data:               http://www.tematika.com
+    repositories:
+        dynamic:
+            type:           folder
+            #path:           S:\Recursos\stage0
+            path:           D:\Tematika\recursos\Stage0
+        static:
+            type:           folder
+            #path:           S:\Recursos\stage0
+            path:           D:\Tematika\recursos\Stage0
+        jrunhome:
+            type:           folder
+            #path:           S:\Recursos\stage0\jrun
+            path:           D:\Tematika\recursos\Stage0\jrun
+        #test:
+        #    type:           s3
+        #    bucket:         beta1.testmatika.com
+        #    dir:
+        #    gzip:           true
+        #    cache:          public,max-age=3600
+        #    access-key:     keychain:test-storage:access-key
+        #    secret-key:     keychain:test-storage:secret-key
+    dataset:                                # configuration of the dataset module
+        database:   eCommerce               # the default database
+        loader:     folder                  # folder loading
+        paths:      [ "./dataset", "./content/dataset" ] # directory where datasets are stored
+    queue:
+        type:       folder
+        folder:     D:\python-app\queue
+        keep:       True
+    logging:
+        version:    1
+        disable_existing_loggers:   true
+        formatters:
+            verbose:
+                format: "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d --- %(message)s"
+        handlers:
+            file:
+                class :         logging.handlers.TimedRotatingFileHandler
+                when:           midnight
+                interval:       1
+                formatter:      verbose
+                filename:       D:\python-app\logs\content\generator.log
+                backupCount:    35
+        loggers:
+            content:
+                handlers:       [ "file" ]
+                propagate:      true
+                level:          INFO

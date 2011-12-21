@@ -1,0 +1,21 @@
+#
+# keychain file
+#
+master-key:
+    data:           7255f551e088bf83e8b60c3ca7465a346ed98ab430ff51ff9c3e0a4e02f9b01478b35e028b8bc7749ad60d75964aca5127b30af298567a23f10fbe2edd58e8e6
+eCommerce-db:
+    data:
+        password:   cced04c2724e73308c4673cddf292f22
+    algorithm:      3DES_CBC
+    key:            master-key
+test-storage:
+    data:
+        access-key: some-value
+        secret-key: some-value
+    algorithm:      clear
+some-other-key:
+    # some hexa value
+    data:
+        password:   44335522661177
+    algorithm:      3DES_CBC
+    key:            master-key

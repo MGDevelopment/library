@@ -1,0 +1,47 @@
+---
+#
+# database config
+#
+global_db:          &global_db
+    dataset:        &global_db_dataset      # base definition for dataset module
+        loader:     folder                  # folder loading
+        database:   eCommerce               # the default database
+        paths:      [ "./dataset", "{{module}}/dataset" ]
+                                            # directory where datasets are stored
+    codetables:     &global_db_codetables   # base definition for codetables module
+        database:   eCommerce               # the default database
+        codetable:  CodeTables
+        fields:
+            tableId:            CodeTableId
+            tableDomain:        TableDomain
+            tableName:          TableName
+            flagGrouped:        FlagGrouped
+            dataTableSchema:    DataTableSchema
+            dataTableName:      DataTableName
+            dataTableId:        CodeTableId
+            dataTableCode:      DataTableCodeField
+            dataTableDesc:      DataTableNameField
+    python:         &global_db_python       # base definition of python modules params
+        # params each module requires in connect
+        psycopg2:   [ "database", "host", "port", "user", "password", "sslmode" ] 
+        pyodbc:     [ "DSN", "password" ] 
+        sqlite3:    [ "database" ] 
+    eCommerce:      &global_db_eCommerce    # base definition of eCommerce db
+        engine:     oracle9i                # db engine
+        python:     pyodbc                  # python module (will import and use "connect")
+        DSN:        Tematika
+        password:   keychain:eCommerce-db:password   # notice the keychain usage
+        encoding:   iso-8859-1
+    test:           &global_db_test         # base definition of test db
+        engine:     sqlite                  # db engine
+        python:     sqlite3                 # python module (will import and use "connect")
+        database:   /tmp/testdb             # params
+        loosetypes: true                    # column types are not rigid
+#
+# keychain config
+#
+global_keychain:    &global_keychain        # keychain config
+    file:           keychain.yaml           # keychain file
+    dirs:           [ "./config", "c:/etc/ecommerce" ]
+                                            # keychain dirs to look for keychain file
+
