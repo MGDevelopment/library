@@ -152,7 +152,7 @@ class S3Storage(BaseStorage):
            bucket_name:           name of the bucket to upload
            directory:             destination directory (key prefix)
            gzip:                  should uploader gzip content (True)
-           cache_type:            Cache-Control header (public,max=age3600)
+           cache_type:            Cache-Control header (public,max-age=3600)
            AWS_ACCESS_KEY_ID:     AWS key id
            AWS_SECRET_ACCESS_KEY: AWS secret key
     '''
