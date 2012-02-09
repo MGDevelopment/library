@@ -172,7 +172,7 @@ def CONT(row, rowBack = True):
         "criterioDeOrden"   : 2,
         "claveDeBusqueda"   : "porIDdeAutor",
         "texto"             : contributorName,
-        "idEditor"          : contributorId
+        "idAutor"           : contributorId
     } )
 
     # build the url
