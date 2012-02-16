@@ -167,3 +167,16 @@ def content_title(row):
         row["EffectiveTitle"] = None
 
     return row
+
+########################################################
+
+def tipoArticulo(row):
+    """Capitalize the TipoArticulo_desc field"""
+
+    # capitalize the TipoArticulo_desc
+    if "TipoArticulo_desc" in row:
+        row["TipoArticulo_desc"] = tmklib.support.capitalize(row["TipoArticulo_desc"])
+    else:
+        row["TipoArticulo_desc"] = None
+
+    return row
