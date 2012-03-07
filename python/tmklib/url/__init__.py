@@ -101,8 +101,22 @@ def PROD(row, rowBack = True, entityIdVar = "EntityId"):
     url += tmklib.support.alphaOnly(
                 tmklib.support.noDiacritics(
                     tmklib.support.capitalize(
-                        row.get("Title")))).strip("_").lower() + \
-           "--" + str(row[entityIdVar])
+                        row.get("Title")))).strip("_").lower()
+
+    # check length. NO MORE THAN 230 chars
+    #
+    # not exact science. Name can have multiple \\ or multiple //
+    # depending on what's configured. Give some room for different
+    # conditions
+    if len(url) > 200:
+        url = url[:200]
+
+    # SIXTH PART - the "--<product id>"
+    #
+    # this is appended later, after we know for sure
+    # file name length is not larger than 230 chars
+    #
+    url += "--" + str(row[entityIdVar])
 
     # set the url
     row["LinkBase"] = url
