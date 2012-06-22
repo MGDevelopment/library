@@ -98,10 +98,14 @@ def PROD(row, rowBack = True, entityIdVar = "EntityId"):
                "--" + str(subfamilia["id"]) + "/"
 
     # FIFTH PART - title
-    url += tmklib.support.alphaOnly(
-                tmklib.support.noDiacritics(
-                    tmklib.support.capitalize(
-                        row.get("Title")))).strip("_").lower()
+    _title = row.get("_Title")
+    if not _title:
+        _title = row.get("Title")
+    url += tmklib.support.smartStrip(
+                tmklib.support.alphaOnly(
+                    tmklib.support.noDiacritics(
+                        tmklib.support.capitalize(
+                            _title, False)), True)).lower()
 
     # check length. NO MORE THAN 230 chars
     #

@@ -16,6 +16,9 @@ import tmklib.cache
 def title(row):
     """Capitalize the title"""
 
+    # keep the original title
+    row["_Title"] = row["Title"]
+
     # capitalize the title
     if "Title" in row:
         row["Title"] = tmklib.support.capitalize(row["Title"])

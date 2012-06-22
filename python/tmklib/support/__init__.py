@@ -44,6 +44,10 @@ def noDiacritics(s):
     # try the right way first
     try:
         str = unicode(s, 'utf-8')
+        # remove some chars
+        str = str.replace(unichr(0xba), "")     # 4o
+        str = str.replace(unichr(0xaa), "")     # 4a
+        # normalization
         ret = unicodedata.normalize('NFKD', str)
         ret = ret.encode('ascii', 'ignore')
     except:
@@ -53,6 +57,10 @@ def noDiacritics(s):
     if ret is None:
         try:
             str = s.decode(s, 'utf-8')
+            # remove some chars
+            str = str.replace(unichr(0xba), "")     # 4o
+            str = str.replace(unichr(0xaa), "")     # 4a
+            # normalization
             ret = unicodedata.normalize('NFKD', str)
             ret = ret.encode('ascii', 'ignore')
         except:
@@ -63,8 +71,15 @@ def noDiacritics(s):
 ########################################################
 
 
-def alphaOnly(s):
+def alphaOnly(s, endDots = False):
     """Removes any character that is not a letter or digit"""
+
+    dotCount = 0
+    dotStr   = ""
+    if endDots:
+        while s.endswith(".", 1, len(s) - dotCount):
+            dotStr   += "."
+            dotCount += 1
 
     # strip non digits, non letters (upper or lower) and non ",", "-", "." or space AS "_"
     s = s.translate(string.maketrans(",-. ", "____"))
@@ -74,11 +89,32 @@ def alphaOnly(s):
                 "abcdefghijklmnopqrstuvwxyz" + \
                 "_"))
 
+    if endDots and dotCount > 0:
+        s = s[:len(s)-dotCount] + dotStr
+
     return s
 
 ########################################################
 
-def capitalize(s):
+def smartStrip(s):
+
+    # remove _
+    s = s.strip("_")
+
+    # replace ending dot by _
+    dotCount = 0
+    dotStr   = ""
+    while s.endswith(".", 1, len(s) - dotCount):
+        dotStr   += "_"
+        dotCount += 1
+    if dotCount > 0:
+        s = s[:len(s)-dotCount] + dotStr
+
+    return s
+
+########################################################
+
+def capitalize(s, fullReplacement = True):
 
     ######### FROM method corregir
 
@@ -102,7 +138,7 @@ def capitalize(s):
         s = s.replace("  ", " ")
 
     # swap articulos (ej: "inmortales, los" => "los inmortales")
-    s = swapArticulos(s, capitalize.rList, True)
+    s = swapArticulos(s, capitalize.rList, fullReplacement)
 
     ######### FROM call to method capitalizarOriginal
     su = unicode(s, 'utf-8')
@@ -149,21 +185,55 @@ def swapArticulos(s, rList, fullReplacement = True):
     # append a space
     s += " "
 
-    # iterate (if needed)
-    lastSpot = 0
-    while fullReplacement and (lastSpot < len(s)):
+    # full replacement => iterate
+    if fullReplacement:
+
+        # iterate (if needed)
+        lastSpot = 0
+        while fullReplacement and (lastSpot < len(s)):
+
+            # find the place where the swap is to happen
+            spot = s.find(".", lastSpot)
+            if spot < 0:
+                spot = s.find("-", lastSpot)
+                if spot < 0:
+                    #    if s.find(" Y ", lastSpot) >= 0:
+                    #        spot = s.find(" Y ", lastSpot) + 1
+                    #    else:
+                    #        spot = -1
+                    spot = -1
+                    if spot < 0:
+                        spot = len(s)
+
+            # replace
+            for r in rList:
+                #
+                # the endswith performs a find but does not create
+                # a new string
+                #
+                ####if s[spot - len(r[0]):spot] == r[0]:
+                if s.endswith(r[0], spot - len(r[0]), spot):
+                    if lastSpot == 0:
+                        # move to the begining
+                        s = r[1] + s[:spot - len(r[0])] + s[spot:]
+                    else:
+                        # move to the begining of lastSpot
+                        s = s[:lastSpot - 1] + r[1] + s[lastSpot - 1:spot - len(r[0])]
+                    break
+
+            # go from this spot
+            lastSpot = spot + 1
+
+    else:
+        # single replacement
 
         # find the place where the swap is to happen
+        lastSpot = 0
         spot = s.find(".", lastSpot)
         if spot < 0:
             spot = s.find("-", lastSpot)
             if spot < 0:
-                if s.find(" Y ", lastSpot) >= 0:
-                    spot = s.find(" Y ", lastSpot) + 1
-                else:
-                    spot = -1
-                if spot < 0:
-                    spot = len(s)
+                spot = len(s)
 
         # replace
         for r in rList:
@@ -171,7 +241,6 @@ def swapArticulos(s, rList, fullReplacement = True):
             # the endswith performs a find but does not create
             # a new string
             #
-            ####if s[spot - len(r[0]):spot] == r[0]:
             if s.endswith(r[0], spot - len(r[0]), spot):
                 if lastSpot == 0:
                     # move to the begining
@@ -180,9 +249,6 @@ def swapArticulos(s, rList, fullReplacement = True):
                     # move to the begining of lastSpot
                     s = s[:lastSpot - 1] + r[1] + s[lastSpot - 1:spot - len(r[0])]
                 break
-
-        # go from this spot
-        lastSpot = spot + 1
 
     return s
 
