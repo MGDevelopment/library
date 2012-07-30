@@ -122,7 +122,10 @@ class QueueFolder(Queue):
                 raise QueueFolderLockException("Cannot lock queue, pid file [%s]" % pidfile)
 
         # if there are entries in work, move them to ready
-        self._undoWork()
+        #
+        # NOTE: only if we are consumers
+        if not self._producer:
+            self._undoWork()
 
         # if not a producer, scan the queue
         if not self._producer:
