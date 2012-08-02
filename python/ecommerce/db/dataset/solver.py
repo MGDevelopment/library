@@ -454,6 +454,15 @@ def solveQuerySQL(dataset, entityType, datasetName, idList):
         # find the next
         start = sql.find(macroBegin)
 
+    #
+    # FIX - Oracle 9i apparently has a bug where if the sentence is
+    #       too large (> 13/16 kb) then it does bogus things.
+    #
+    # what we do is split all the lines in the sentence, do a left trim
+    # (remove leading spaces) and rejoin the string
+    # 
+    sql = "\n".join( [ a.lstrip() for a in sql.split("\n") ] )
+
     return sql
 
 
