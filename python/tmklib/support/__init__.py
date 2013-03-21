@@ -43,12 +43,12 @@ def noDiacritics(s):
 
     # try the right way first
     try:
-        str = unicode(s, 'utf-8')
+        strAux = unicode(s, 'utf-8')
         # remove some chars
-        str = str.replace(unichr(0xba), "")     # 4o
-        str = str.replace(unichr(0xaa), "")     # 4a
+        strAux = strAux.replace(unichr(0xba), "")     # 4o
+        strAux = strAux.replace(unichr(0xaa), "")     # 4a
         # normalization
-        ret = unicodedata.normalize('NFKD', str)
+        ret = unicodedata.normalize('NFKD', strAux)
         ret = ret.encode('ascii', 'ignore')
     except:
         ret = None
@@ -56,12 +56,12 @@ def noDiacritics(s):
     # try as a unicode encoded string
     if ret is None:
         try:
-            str = s.decode(s, 'utf-8')
+            strAux = s.decode(s, 'utf-8')
             # remove some chars
-            str = str.replace(unichr(0xba), "")     # 4o
-            str = str.replace(unichr(0xaa), "")     # 4a
+            strAux = strAux.replace(unichr(0xba), "")     # 4o
+            strAux = strAux.replace(unichr(0xaa), "")     # 4a
             # normalization
-            ret = unicodedata.normalize('NFKD', str)
+            ret = unicodedata.normalize('NFKD', strAux)
             ret = ret.encode('ascii', 'ignore')
         except:
             ret = s     # return as received
@@ -138,7 +138,7 @@ def capitalize(s, fullReplacement = True):
         s = s.replace("  ", " ")
 
     # swap articulos (ej: "inmortales, los" => "los inmortales")
-    s = swapArticulos(s, capitalize.rList, fullReplacement)
+    s = swapArticulos(s, capitalize.rList, capitalize.abrList, fullReplacement)
 
     ######### FROM call to method capitalizarOriginal
     su = unicode(s, 'utf-8')
@@ -178,10 +178,23 @@ capitalize.rList = [   \
     (", LES ", "LES ")  \
 ]
 
+capitalize.abrList = [  \
+    ("DR.",  "_@1"),  \
+    ("DRA.", "_@2"),  \
+    ("MR.",  "_@3"),  \
+    ("MRS.", "_@4"),  \
+    ("SR.",  "_@5"),  \
+    ("SRA.", "_@6")  \
+]
+
 ########################################################
 
-def swapArticulos(s, rList, fullReplacement = True):
-
+def swapArticulos(s, rList, abrList, fullReplacement = True):
+    
+    # replace with abrList
+    for r in abrList:
+        s = s.replace(r[0], r[1])
+            
     # append a space
     s += " "
 
@@ -250,6 +263,10 @@ def swapArticulos(s, rList, fullReplacement = True):
                     s = s[:lastSpot - 1] + r[1] + s[lastSpot - 1:spot - len(r[0])]
                 break
 
+    # undo replace with abrList
+    for r in abrList:
+        s = s.replace(r[1], r[0])
+        
     return s
 
 ########################################################
