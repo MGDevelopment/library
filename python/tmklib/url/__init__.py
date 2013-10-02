@@ -182,19 +182,40 @@ def CONT(row, rowBack = True):
     seccionId       = str(row.get("Categoria_Seccion", 1))
     contributorId   = str(row.get("ContributorId", 0))
     contributorName = row.get("ContributorName", "")
+    
+    optSeleccionada = "Autor"
+    seccionDeBusqueda = "En Libros"
+    if seccionId == 1 :
+        optSeleccionada = "Autor"
+        seccionDeBusqueda = "En Libros"
+    elif seccionId == 4 :
+        optSeleccionada = "Grupo/Int%E9rprete"
+        seccionDeBusqueda = "En Musica"
+    elif seccionId == 5 :
+        optSeleccionada = "Director/Actor"
+        seccionDeBusqueda = "En Peliculas"
+    elif seccionId == 3 :
+        optSeleccionada = "Autor"
+        seccionDeBusqueda = "En Pasatiempos"
+    
 
     # encode the url params
     params = urllib.urlencode( {
         "seccion"           : seccionId,
         "idSeccion"         : seccionId,
         "criterioDeOrden"   : 2,
-        "claveDeBusqueda"   : "porIDdeAutor",
+        "claveDeBusqueda"   : "porAutor",
         "texto"             : contributorName,
-        "idAutor"           : contributorId
+        "idAutor"           : contributorId,
+        "txtencoded"        : contributorName,
+        "optSeleccionada"   : optSeleccionada,
+        "seccionDeBusqueda" : seccionDeBusqueda,
+        "idSeccionPropia"   : seccionId
     } )
 
     # build the url
-    linkBase = "/buscador/productos.jsp?" + params
+    #linkBase = "/buscador/productos.jsp?" + params
+    linkBase = "/buscar.do?" + params
 
     # set the URL
     row["ContributorURL"] = linkBase
