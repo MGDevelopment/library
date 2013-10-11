@@ -73,6 +73,7 @@ class FilesystemStorage(BaseStorage):
 
         # test if directory is OK
         if not exists(directory):
+            print directory
             raise IOError('invalid storage directory')
 
         self._directory  = directory
