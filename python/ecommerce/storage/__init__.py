@@ -6,7 +6,11 @@ from os            import remove, makedirs, sep
 from boto          import connect_s3
 from boto.s3.key   import Key
 from gzip          import GzipFile
+from win_unc import (DiskDrive, UncDirectory,
+                     UncDirectoryConnection, UncDirectoryMount, UncCredentials)
+
 import types
+import os
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -247,6 +251,22 @@ class S3Storage(BaseStorage):
 
 def _createFilesystemStorage(config, prefix):
 
+    # Mount directory with authorization to the named drive.
+    drive = config.getMulti(prefix, "drive")
+    folder = config.getMulti(prefix, "folder")
+    usr = config.getMulti(prefix, "usr")
+    pwd = config.getMulti(prefix, "pwd")
+    
+    if drive is not None: 
+        creds = UncCredentials(usr, pwd)
+        authz_unc = UncDirectory(folder, creds)
+    
+        mnt = UncDirectoryMount(authz_unc, DiskDrive(drive))
+    
+        if not mnt.is_mounted():
+            mnt.mount()
+            print 'Mounted?', mnt.is_mounted()
+    
     # fetch attributes and create
     dir = config.getMulti(prefix, "path")
     return FilesystemStorage(dir)
