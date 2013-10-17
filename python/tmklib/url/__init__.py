@@ -150,19 +150,40 @@ def IMPR(row, rowBack = True):
     seccionId   = str(row.get("Categoria_Seccion", 1))
     imprintId   = str(row.get("ImprintId", 0))
     imprintName = row.get("ImprintName", "")
+    
+    optSeleccionada = "Editorial"
+    seccionDeBusqueda = "En Libros"
+    if seccionId == 1 :
+        optSeleccionada = "Editorial"
+        seccionDeBusqueda = "En Libros"
+    elif seccionId == 4 :
+        optSeleccionada = "Sello Discogr%E1fico"
+        seccionDeBusqueda = "En Musica"
+    elif seccionId == 5 :
+        optSeleccionada = "Productora"
+        seccionDeBusqueda = "En Peliculas"
+    elif seccionId == 3 :
+        optSeleccionada = "Editorial"
+        seccionDeBusqueda = "En Pasatiempos"
+    
 
     # encode the url params
     params = urllib.urlencode( {
         "seccion"           : seccionId,
         "idSeccion"         : seccionId,
         "criterioDeOrden"   : 2,
-        "claveDeBusqueda"   : "porIDdeEditorial",
+        "claveDeBusqueda"   : "porEditorial",
         "texto"             : imprintName,
-        "idEditor"          : imprintId
+        "idAutor"           : imprintId,
+        "txtencoded"        : imprintName,
+        "optSeleccionada"   : optSeleccionada,
+        "seccionDeBusqueda" : seccionDeBusqueda,
+        "idSeccionPropia"   : seccionId
     } )
 
     # build the url
-    linkBase = "/buscador/productos.jsp?" + params
+    #linkBase = "/buscador/productos.jsp?" + params
+    linkBase = "/buscar.do?" + params
 
     # set the URL
     row["ImprintURL"] = linkBase
