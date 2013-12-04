@@ -33,6 +33,17 @@ def categories(row):
     grupo      = tmklib.url.tree.findNode(cat_seccion, cat_grupo, -1, -1)
     familia    = tmklib.url.tree.findNode(cat_seccion, cat_grupo, cat_familia, -1)
     subfamilia = tmklib.url.tree.findNode(cat_seccion, cat_grupo, cat_familia, cat_subfamilia)
+    
+    optSeleccionada = "T%E3tulo"
+    seccionDeBusqueda = "En Libros"
+    if cat_seccion == 1 :
+        seccionDeBusqueda = "En Libros"
+    elif cat_seccion == 4 :
+        seccionDeBusqueda = "En Musica"
+    elif cat_seccion == 5 :
+        seccionDeBusqueda = "En Peliculas"
+    elif cat_seccion == 3 :
+        seccionDeBusqueda = "En Pasatiempos"
 
     # prepare the result
     categories = [ ]
@@ -42,13 +53,17 @@ def categories(row):
     if cat_grupo != -1 and grupo is not None:
         categories.append( {
             "Title"     : tmklib.support.capitalize(grupo["Nombre"]),
-            "URL"       : "/buscador/productos.jsp?" + urllib.urlencode( {
+            "URL"       : "/buscar.do?" + urllib.urlencode( {
                                 "seccion"           : cat_seccion,
                                 "idSeccion"         : cat_seccion,
                                 "criterioDeOrden"   : 6,
-                                "claveDeBusqueda"   : "porCategorias",
+                                "claveDeBusqueda"   : "porIDdeCategoria",
                                 "texto"             : grupo["Descripcion"],
-                                "grupo"             : cat_grupo
+                                "txtencoded"        : grupo["Descripcion"],
+                                "grupo"             : cat_grupo,
+                                "idSeccionPropia"   : cat_seccion,
+                                "optSeleccionada"   : optSeleccionada,
+                                "seccionDeBusqueda" : seccionDeBusqueda
                             } )
         } )
 
@@ -57,14 +72,18 @@ def categories(row):
     if cat_familia != -1 and familia is not None:
         categories.append( {
             "Title"     : tmklib.support.capitalize(familia["Nombre"]),
-            "URL"       : "/buscador/productos.jsp?" + urllib.urlencode( {
+            "URL"       : "/buscar.do?" + urllib.urlencode( {
                                 "seccion"           : cat_seccion,
                                 "idSeccion"         : cat_seccion,
                                 "criterioDeOrden"   : 6,
-                                "claveDeBusqueda"   : "porCategorias",
+                                "claveDeBusqueda"   : "porIDdeCategoria",
                                 "texto"             : familia["Descripcion"],
+                                "txtencoded"        : familia["Descripcion"],
                                 "grupo"             : cat_grupo,
-                                "familia"           : cat_familia
+                                "familia"           : cat_familia,
+                                "idSeccionPropia"   : cat_seccion,
+                                "optSeleccionada"   : optSeleccionada,
+                                "seccionDeBusqueda" : seccionDeBusqueda
                             } )
         } )
 
@@ -73,15 +92,19 @@ def categories(row):
     if cat_subfamilia != -1 and subfamilia is not None:
         categories.append( {
             "Title"     : tmklib.support.capitalize(subfamilia["Nombre"]),
-            "URL"       : "/buscador/productos.jsp?" + urllib.urlencode( {
+            "URL"       : "/buscar.do?" + urllib.urlencode( {
                                 "seccion"           : cat_seccion,
                                 "idSeccion"         : cat_seccion,
                                 "criterioDeOrden"   : 6,
-                                "claveDeBusqueda"   : "porCategorias",
+                                "claveDeBusqueda"   : "porIDdeCategoria",
                                 "texto"             : subfamilia["Descripcion"],
+                                "txtencoded"        : subfamilia["Descripcion"],
                                 "grupo"             : cat_grupo,
                                 "familia"           : cat_familia,
-                                "subfamilia"        : cat_subfamilia
+                                "subfamilia"        : cat_subfamilia,
+                                "idSeccionPropia"   : cat_seccion,
+                                "optSeleccionada"   : optSeleccionada,
+                                "seccionDeBusqueda" : seccionDeBusqueda
                             } )
         } )
 
