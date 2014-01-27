@@ -168,6 +168,7 @@ def capitalize(s, fullReplacement = True):
     s = s.strip()
 
     return s
+# utils list to capitalize
 capitalize.rList = [   \
     (", EL ",  "EL "),  \
     (", LA ",  "LA "),  \
@@ -177,14 +178,14 @@ capitalize.rList = [   \
     (", THE ", "THE "), \
     (", LES ", "LES ")  \
 ]
-
 capitalize.abrList = [  \
     ("DR.",  "_@1"),  \
     ("DRA.", "_@2"),  \
     ("MR.",  "_@3"),  \
     ("MRS.", "_@4"),  \
     ("SR.",  "_@5"),  \
-    ("SRA.", "_@6")  \
+    ("SRA.", "_@6"), \
+    (". ","_@7") \
 ]
 
 ########################################################
