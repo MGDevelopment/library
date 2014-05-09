@@ -1,8 +1,8 @@
-Libraries and Modules for Tematika.com App
+Libraries and Modules for T.com App
 ==========================================
 
 This repository contains all the libraries and modules required by the rest of
-the applications running tematika.com
+the applications running t.com
 
 Directories
 -----------
